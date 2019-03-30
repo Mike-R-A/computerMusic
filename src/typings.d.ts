@@ -17,20 +17,25 @@ declare enum Note {
 }
 
 declare enum NoteLength {
-    Semibreve = '1n',
-    DottedMinim = '2n.',
-    Minim = '2n',
-    DottedCrotchet = '4n.',
-    Crotchet = '4n',
-    DottedQuaver = '8n.',
-    Quaver = '8n',
-    SemiQuaver = '16n'
+    Semibreve = 4,
+    DottedMinim = 3,
+    Minim = 2,
+    DottedCrotchet = 1.5,
+    Crotchet = 1,
+    DottedQuaver = 0.75,
+    Quaver = 0.5,
+    SemiQuaver = 0.25
 }
 
-interface Tone {
+interface ITone {
     note: Note;
     octave: number;
     length: NoteLength;
     volume: number;
     id: string;
+}
+
+interface Motif {
+    pitches: number[];
+    rhythm: NoteLength[];
 }

@@ -5,6 +5,8 @@ import { Injectable } from '@angular/core';
 })
 export class SoundService {
   synth: any;
+  minOctave = 2;
+  maxOctave = 6;
   constructor() {
     this.synth = new Tone.Synth().toMaster();
   }
