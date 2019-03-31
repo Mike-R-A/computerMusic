@@ -1,3 +1,5 @@
+import { NoteLength } from './enums';
+
 export class TimeSignature {
     beats: number;
     beatType: NoteLength;

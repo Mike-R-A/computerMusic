@@ -1,9 +1,11 @@
-export class Tone implements ITone {
+import { NoteLength, Note } from './enums';
+
+export class NoteTone {
     octave: number;
     length: NoteLength;
     volume: number;
     note: Note;
     get id() {
-        return this.note.toString() + this.octave.toString();
+        return this.note + this.octave;
     }
 }
