@@ -212,7 +212,6 @@ export class MusicService {
         tone.octave = octaveToUse;
       }
       tone.length = motif.rhythm[i];
-      console.log('motifRhythmi', motif.rhythm[i]);
 
       appliedMotif.push(tone);
     }
@@ -222,8 +221,6 @@ export class MusicService {
 
   public developMotif(key: Note[], motif: Motif, startIndexes: number[],
     timeSignature: TimeSignature, maxBars = 8, startOctave = 4, alterChance = 0.5): NoteTone[] {
-    console.log('developMotif', motif);
-
     let phrase = <NoteTone[]>[];
     for (const startIndex of startIndexes) {
       const max = Math.round(1 / alterChance);
@@ -236,11 +233,8 @@ export class MusicService {
       }
 
       const addition = this.applyMotif(key, altered, startIndex, startOctave);
-      console.log('addition', addition, phrase[0] && phrase[0].note);
-
       const timeWithAddition = this.totalTime(phrase) + this.totalTime(addition);
       const maxTime = maxBars * timeSignature.barTime;
-      console.log('phrase loses notes here', phrase);
 
       if (timeWithAddition < maxTime) {
         phrase = [...phrase, ...addition];
@@ -313,8 +307,6 @@ export class MusicService {
     });
     if (toneLengths.length > 0) {
       const total = toneLengths.reduce((t, l) => t + l);
-      console.log('total time', phrase, toneLengths);
-
       return total;
     } else {
       return 0;

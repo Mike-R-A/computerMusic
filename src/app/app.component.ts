@@ -62,8 +62,6 @@ export class AppComponent implements OnInit {
       motifs.push(chordalMotif3);
     }
 
-    console.log('motifs', motifs);
-
     const keys = <Note[][]>[];
     keys.push(this.keyService.major(Note.DsharpEflat));
     keys.push(this.keyService.minorHarmonic(Note.C));
@@ -108,7 +106,7 @@ export class AppComponent implements OnInit {
         phrases.push(phrase);
       }
 
-      console.log('phrases', phrases);
+      console.log();
       console.log();
       console.log('Section');
       console.log();
@@ -121,17 +119,19 @@ export class AppComponent implements OnInit {
         for (const tone of phrases[i]) {
 
           console.log(tone.id + ' ');
-          this.soundService.playNote(tone);
+          this.soundService.addNoteToTransport(tone);
         }
       }
       console.log(' | ');
       for (const tone of phrases[0]) {
         console.log(tone.id + ' ');
-        this.soundService.playNote(tone);
+        this.soundService.addNoteToTransport(tone);
       }
 
       console.log(' || ');
       allPhrases = [...allPhrases, ...phrases];
     }
+
+    this.soundService.startTransport();
   }
 }
