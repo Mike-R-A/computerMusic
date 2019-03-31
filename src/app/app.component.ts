@@ -1,4 +1,4 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit, OnDestroy } from '@angular/core';
 import { SoundService } from './sound.service';
 import { Random } from './helpers/random';
 import { MusicService } from './music.service';
@@ -12,7 +12,7 @@ import { NoteTone } from './model/tone';
   templateUrl: './app.component.html',
   styleUrls: ['./app.component.scss']
 })
-export class AppComponent implements OnInit {
+export class AppComponent implements OnInit, OnDestroy {
   title = 'computer-music';
   synth: any;
 
