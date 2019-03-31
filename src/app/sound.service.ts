@@ -7,8 +7,8 @@ import { NoteTone } from './model/tone';
 })
 export class SoundService {
   synth: any;
-  minOctave = 2;
-  maxOctave = 6;
+  minOctave = 0;
+  maxOctave = 10;
   bar = 0;
   beat = 0;
   sixteenth = 0;
@@ -20,6 +20,7 @@ export class SoundService {
 
   constructor() {
     this.synth = new Tone.Synth().toMaster();
+    this.synth.sync();
     Tone.Transport.bpm.value = 120;
   }
 
@@ -46,7 +47,7 @@ export class SoundService {
     console.log(this.currentTime);
 
     Tone.Transport.schedule((time) => {
-      this.playNote(tone);
+      this.playNote(tone, time);
     }, this.currentTime);
     this.addTime(tone.length);
   }
@@ -55,20 +56,24 @@ export class SoundService {
     Tone.Transport.start();
   }
 
-  playNote(tone: NoteTone) {
+  stopTransport() {
+    Tone.Transport.stop();
+  }
+
+  playNote(tone: NoteTone, time: any) {
     console.log('playNote', tone);
 
     if (tone.note === Note.Rest) {
       // play rest
       console.log('REST', tone.id, this.mapNoteLengthToDuration(tone.length));
     } else {
-      this.playSound(tone.id, this.mapNoteLengthToDuration(tone.length));
+      this.playSound(tone.id, this.mapNoteLengthToDuration(tone.length), time, tone.volume);
     }
   }
 
-  playSound(note: string, duration: string) {
+  playSound(note: string, duration: string, time: any, volume: number) {
     console.log('playSound', note, duration);
-    this.synth.triggerAttackRelease(note, duration);
+    this.synth.triggerAttackRelease(note, duration, time, volume);
   }
 
   mapNoteLengthToDuration(noteLength: NoteLength) {

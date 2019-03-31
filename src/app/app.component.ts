@@ -134,4 +134,8 @@ export class AppComponent implements OnInit {
 
     this.soundService.startTransport();
   }
+
+  ngOnDestroy() {
+    this.soundService.stopTransport();
+  }
 }
