@@ -14,54 +14,46 @@ import { NoteTone } from './model/tone';
 })
 export class AppComponent implements OnInit {
   title = 'computer-music';
-  motifLength = 16;
+  motifLength = 4;
   motifMaxSize = 8;
   motifStasisInhibitor = 8;
   motifRestChance = 0.01;
   motifMostLikelyNoteLength = NoteLength.Crotchet;
-  phraseBarLength = 8;
+  phraseBarLength = 4;
   isChordalChance = 0.25;
   motifs = [];
   phrases = [];
   key = [];
   constructor(private soundService: SoundService,
     private musicService: MusicService,
-    private keyService: KeyService, private changeDetector: ChangeDetectorRef) { }
+    private keyService: KeyService) { }
 
   ngOnInit() {
     this.key = this.keyService.minorHarmonic(Note.C);
-    this.createMotifs();
+    this.createMotif();
     this.compose();
   }
 
-  createMotifs(numberOfMotifs = 4) {
-    for (let i = 0; i < numberOfMotifs; i++) {
-      const isChordal = this.isChordalChance >= 0 && this.isChordalChance <= 1
-        && Random.next(1, Math.round(1 / this.isChordalChance)) === 1;
-      const motif = this.musicService.motif(this.motifLength, this.motifMaxSize,
-        this.motifStasisInhibitor, this.motifRestChance, this.motifMostLikelyNoteLength, isChordal);
-      this.motifs.push(motif);
-    }
+  createMotif() {
+    const isChordal = this.isChordalChance >= 0 && this.isChordalChance <= 1
+      && Random.next(1, Math.round(1 / this.isChordalChance)) === 1;
+    const motif = this.musicService.motif(this.motifLength, this.motifMaxSize,
+      this.motifStasisInhibitor, this.motifRestChance, this.motifMostLikelyNoteLength, isChordal);
+    this.motifs.push(motif);
   }
 
-  compose(noOfPhrases = 2) {
+  compose() {
     const timeSignature = new TimeSignature();
     timeSignature.beats = 4;
     timeSignature.beatType = NoteLength.Crotchet;
-
-    for (let i = 0; i < this.motifs.length; i++) {
-      const randomInt1 = Random.next(0, this.motifs.length - 1);
-      const randomInt2 = Random.next(0, this.motifs.length - 1);
-      const alterChance = 1 / (Random.next(1, 10));
-      const phrase = this.musicService.developMotif(this.key, this.motifs[randomInt1],
-        this.motifs[randomInt2].pitches, timeSignature, this.phraseBarLength, 4, alterChance);
-      this.phrases.push(phrase);
-    }
-
-    for (let i = 0; i < noOfPhrases; i++) {
-      for (const tone of this.phrases[i]) {
-        this.soundService.addNoteToTransport(tone);
-      }
+    const randomInt1 = Random.next(0, this.motifs.length - 1);
+    const randomInt2 = Random.next(0, this.motifs.length - 1);
+    const alterChance = 1 / (Random.next(1, 10));
+    const phrase = this.musicService.developMotif(this.key, this.motifs[randomInt1],
+      this.motifs[randomInt2].pitches, timeSignature, this.phraseBarLength, 4, alterChance);
+    this.phrases.push(phrase);
+    for (const tone of phrase) {
+      this.soundService.addNoteToTransport(tone);
     }
   }
 
