@@ -23,11 +23,14 @@ export class AppComponent implements OnInit {
   isChordalChance = 0.25;
   motifs = [];
   phrases = [];
+  key = [];
   constructor(private soundService: SoundService,
     private musicService: MusicService,
     private keyService: KeyService, private changeDetector: ChangeDetectorRef) { }
 
   ngOnInit() {
+    this.key = this.keyService.minorHarmonic(Note.C);
+    this.createMotifs();
     this.compose();
   }
 
@@ -41,67 +44,24 @@ export class AppComponent implements OnInit {
     }
   }
 
-  compose() {
-    this.createMotifs();
-    const keys = <Note[][]>[];
-    keys.push(this.keyService.major(Note.DsharpEflat));
-    keys.push(this.keyService.minorHarmonic(Note.C));
-    keys.push(this.keyService.major(Note.GsharpAflat));
-    keys.push(this.keyService.minorHarmonic(Note.F));
-    keys.push(this.keyService.major(Note.CsharpDflat));
-    keys.push(this.keyService.minorHarmonic(Note.AsharpBflat));
-    keys.push(this.keyService.major(Note.E));
-    keys.push(this.keyService.minorHarmonic(Note.DsharpEflat));
-    let allPhrases = <NoteTone[][]>[];
-    for (const key of keys) {
-      const phrases = <NoteTone[][]>[];
-      const timeSignature = new TimeSignature();
-      timeSignature.beats = 4;
-      timeSignature.beatType = NoteLength.Crotchet;
+  compose(noOfPhrases = 2) {
+    const timeSignature = new TimeSignature();
+    timeSignature.beats = 4;
+    timeSignature.beatType = NoteLength.Crotchet;
 
-      for (let i = 0; i < this.motifs.length; i++) {
-        const randomInt1 = Random.next(0, this.motifs.length - 1);
-        const randomInt2 = Random.next(0, this.motifs.length - 1);
-        // const randomBarLength = Random.next(0, 2);
-        // let maxBarLength = 0;
-        // switch (randomBarLength) {
-        //   case 0:
-        //     {
-        //       maxBarLength = 2;
-        //       break;
-        //     }
-        //   case 1:
-        //     {
-        //       maxBarLength = 4;
-        //       break;
-        //     }
-        //   case 2:
-        //     {
-        //       maxBarLength = 8;
-        //       break;
-        //     }
-        // }
-        const alterChance = 1 / (Random.next(1, 10));
-        const phrase = this.musicService.developMotif(key, this.motifs[randomInt1],
-          this.motifs[randomInt2].pitches, timeSignature, this.phraseBarLength, 4, alterChance);
-        phrases.push(phrase);
-      }
+    for (let i = 0; i < this.motifs.length; i++) {
+      const randomInt1 = Random.next(0, this.motifs.length - 1);
+      const randomInt2 = Random.next(0, this.motifs.length - 1);
+      const alterChance = 1 / (Random.next(1, 10));
+      const phrase = this.musicService.developMotif(this.key, this.motifs[randomInt1],
+        this.motifs[randomInt2].pitches, timeSignature, this.phraseBarLength, 4, alterChance);
+      this.phrases.push(phrase);
+    }
 
-      console.log('phrases', phrases);
-
-      const phraseLengthOfSection = 4;
-
-      for (let i = 0; i < phraseLengthOfSection; i++) {
-        // let randomPhraseIndex = randomIntGenerator.Next(0, phrases.Count);
-        for (const tone of phrases[i]) {
-          this.soundService.addNoteToTransport(tone);
-        }
-      }
-      for (const tone of phrases[0]) {
+    for (let i = 0; i < noOfPhrases; i++) {
+      for (const tone of this.phrases[i]) {
         this.soundService.addNoteToTransport(tone);
       }
-
-      allPhrases = [...allPhrases, ...phrases];
     }
   }
 
