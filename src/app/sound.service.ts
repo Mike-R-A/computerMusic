@@ -25,6 +25,8 @@ export class SoundService {
   }
 
   addTime(noteLength: NoteLength, beatsInBar = 4) {
+    console.log(this.bar, ':', this.beat, ':', this.sixteenth, 'currentTime', this.currentTime, ' notelength:', noteLength);
+
     const addedToBeat = this.beat + noteLength;
     let bars = 0;
     const remainder = addedToBeat % beatsInBar;
@@ -32,13 +34,17 @@ export class SoundService {
     const sixteenths = (remainder - beats) / 0.25;
     this.beat = beats;
     this.sixteenth = this.sixteenth + sixteenths;
-    if (addedToBeat > beatsInBar) {
+    if (addedToBeat >= beatsInBar) {
       bars = Math.floor(addedToBeat / beatsInBar);
       this.bar = this.bar + bars;
     }
+
+    console.log(this.bar, ':', this.beat, ':', this.sixteenth, ' currentTime:', this.currentTime);
   }
 
   addNoteToTransport(tone: NoteTone) {
+    console.log('addToTransport', tone, this.currentTime);
+
     Tone.Transport.schedule((time) => {
       if (tone.note !== Note.Rest) {
         this.playNote(tone, time);

@@ -15,8 +15,8 @@ import { NoteTone } from './model/tone';
 export class AppComponent implements OnInit {
   title = 'computer-music';
   motifLength = 16;
-  motifMaxSize = 20;
-  motifStasisInhibitor = 0;
+  motifMaxSize = 8;
+  motifStasisInhibitor = 3;
   motifRestChance = 0.01;
   motifMostLikelyNoteLength = NoteLength.Crotchet;
   phraseBarLength = 8;
@@ -55,22 +55,23 @@ export class AppComponent implements OnInit {
       const chordalMotif2 = this.musicService.makeChordal(motif);
       const chordalMotif3 = this.musicService.makeChordal(motif);
       motifs.push(motif);
-      motifs.push(alteredMotif1);
-      motifs.push(alteredMotif2);
-      motifs.push(chordalMotif1);
-      motifs.push(chordalMotif2);
-      motifs.push(chordalMotif3);
+      // motifs.push(alteredMotif1);
+      // motifs.push(alteredMotif2);
+      // motifs.push(chordalMotif1);
+      // motifs.push(chordalMotif2);
+      // motifs.push(chordalMotif3);
     }
 
     const keys = <Note[][]>[];
-    keys.push(this.keyService.major(Note.DsharpEflat));
-    keys.push(this.keyService.minorHarmonic(Note.C));
-    keys.push(this.keyService.major(Note.GsharpAflat));
-    keys.push(this.keyService.minorHarmonic(Note.F));
-    keys.push(this.keyService.major(Note.CsharpDflat));
-    keys.push(this.keyService.minorHarmonic(Note.AsharpBflat));
-    keys.push(this.keyService.major(Note.E));
-    keys.push(this.keyService.minorHarmonic(Note.DsharpEflat));
+    keys.push(this.keyService.major(Note.C));
+    // keys.push(this.keyService.major(Note.DsharpEflat));
+    // keys.push(this.keyService.minorHarmonic(Note.C));
+    // keys.push(this.keyService.major(Note.GsharpAflat));
+    // keys.push(this.keyService.minorHarmonic(Note.F));
+    // keys.push(this.keyService.major(Note.CsharpDflat));
+    // keys.push(this.keyService.minorHarmonic(Note.AsharpBflat));
+    // keys.push(this.keyService.major(Note.E));
+    // keys.push(this.keyService.minorHarmonic(Note.DsharpEflat));
     let allPhrases = <NoteTone[][]>[];
     for (const key of keys) {
       const phrases = <NoteTone[][]>[];
@@ -105,6 +106,8 @@ export class AppComponent implements OnInit {
           motifs[randomInt2].pitches, timeSignature, this.phraseBarLength, 4, alterChance);
         phrases.push(phrase);
       }
+
+      console.log('phrases', phrases);
 
       const phraseLengthOfSection = 4;
 

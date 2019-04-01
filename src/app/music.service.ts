@@ -34,7 +34,7 @@ export class MusicService {
     const motif = new Motif();
     let addRest = Random.next(0, Math.round(1 / restChance));
     const randomPitch = addRest === 1 ? -1 : Random.next(0, maxSize);
-    let previousDirection = Random.next(-1, 2);
+    let previousDirection = Random.next(-1, 1);
     let nextIndex = randomPitch;
     let lastIndex = randomPitch;
     motif.pitches.push(nextIndex);
@@ -51,7 +51,7 @@ export class MusicService {
         let potentialNextIndex = lastIndex + direction;
         previousDirection = direction;
         while (potentialNextIndex < 0 || potentialNextIndex > maxSize) {
-          const newDirection = Random.next(-1, 2);
+          const newDirection = Random.next(-1, 1);
           potentialNextIndex = nextIndex + newDirection;
         }
         addRest = Random.next(0, Math.round(1 / restChance));
@@ -61,7 +61,6 @@ export class MusicService {
       motif.pitches.push(nextIndex);
       motif.rhythm.push(this.randomNoteLength(mostLikelyNoteLength));
     }
-
     return motif;
   }
 
@@ -215,7 +214,6 @@ export class MusicService {
 
       appliedMotif.push(tone);
     }
-
     return appliedMotif;
   }
 
@@ -251,7 +249,6 @@ export class MusicService {
       }
     }
     this.padWithRests(phrase, timeSignature);
-
     return phrase;
   }
 
