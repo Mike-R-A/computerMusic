@@ -4,4 +4,21 @@
 <button (click)="addMotifVariation()">Add Motif Variation</button>
 <button (click)="addPhrase()">Add Phrase</button>
 
+<div>
+  <label>Motif length (notes)
+  </label>
+  <mat-slider [invert]="invert" [max]="50" [min]="1" [step]="1" [(ngModel)]="motifLength">
+  </mat-slider>
+  {{motifLength}}
+</div>
+
+<div>
+  <label>Phrase length (bars)
+  </label>
+  <mat-slider [invert]="invert" [max]="50" [min]="1" [step]="1" [(ngModel)]="phraseBarLength">
+  </mat-slider>
+  {{phraseBarLength}}
+</div>
+
+
 <router-outlet></router-outlet>

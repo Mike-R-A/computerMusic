@@ -30,8 +30,6 @@ export class AppComponent implements OnInit {
 
   ngOnInit() {
     this.key = this.keyService.minorHarmonic(Note.C);
-    this.addMotif();
-    this.addPhrase();
   }
 
   addMotif() {
