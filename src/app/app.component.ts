@@ -16,7 +16,7 @@ export class AppComponent implements OnInit {
   title = 'computer-music';
   motifLength = 16;
   motifMaxSize = 8;
-  motifStasisInhibitor = 3;
+  motifStasisInhibitor = 8;
   motifRestChance = 0.01;
   motifMostLikelyNoteLength = NoteLength.Crotchet;
   phraseBarLength = 8;
