@@ -30,11 +30,11 @@ export class AppComponent implements OnInit {
 
   ngOnInit() {
     this.key = this.keyService.minorHarmonic(Note.C);
-    this.createMotif();
-    this.compose();
+    this.addMotif();
+    this.addPhrase();
   }
 
-  createMotif() {
+  addMotif() {
     const isChordal = this.isChordalChance >= 0 && this.isChordalChance <= 1
       && Random.next(1, Math.round(1 / this.isChordalChance)) === 1;
     const motif = this.musicService.motif(this.motifLength, this.motifMaxSize,
@@ -42,7 +42,12 @@ export class AppComponent implements OnInit {
     this.motifs.push(motif);
   }
 
-  compose() {
+  addMotifVariation() {
+    const randomInt = Random.next(0, this.motifs.length - 1);
+    this.musicService.modifyMotif(this.motifs[randomInt], this.motifs);
+  }
+
+  addPhrase() {
     const timeSignature = new TimeSignature();
     timeSignature.beats = 4;
     timeSignature.beatType = NoteLength.Crotchet;
