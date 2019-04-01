@@ -1,4 +1,4 @@
-import { Component, OnInit, OnDestroy } from '@angular/core';
+import { Component, OnInit, OnDestroy, ChangeDetectorRef } from '@angular/core';
 import { SoundService } from './sound.service';
 import { Random } from './helpers/random';
 import { MusicService } from './music.service';
@@ -12,28 +12,29 @@ import { NoteTone } from './model/tone';
   templateUrl: './app.component.html',
   styleUrls: ['./app.component.scss']
 })
-export class AppComponent implements OnInit, OnDestroy {
+export class AppComponent implements OnInit {
   title = 'computer-music';
-  synth: any;
-
+  motifLength = 16;
+  motifMaxSize = 20;
+  motifStasisInhibitor = 0;
+  motifRestChance = 0.01;
+  motifMostLikelyNoteLength = NoteLength.Crotchet;
+  phraseBarLength = 8;
   constructor(private soundService: SoundService,
     private musicService: MusicService,
-    private keyService: KeyService) { }
+    private keyService: KeyService, private changeDetector: ChangeDetectorRef) { }
 
   ngOnInit() {
-    this.synth = new Tone.Synth().toMaster();
+    this.compose();
   }
 
-  playSound() {
+  compose() {
     const motifs = <IMotif[]>[];
 
     for (let i = 0; i < 4; i++) {
-      const randomLength = Random.next(1, 10);
-      console.log('Motif Length, ' + randomLength);
-      const randomMaxSize = Random.next(1, 12);
-      console.log('Motif Max Size, ' + randomMaxSize);
-      const randomStasisInhibitor = Random.next(0, 5);
-      console.log('Motif Stasis Inhibitor, ' + randomStasisInhibitor);
+      // this.motifLength = Random.next(1, 10);
+      // this.motifMaxSize = Random.next(1, 12);
+      // this.motifStasisInhibitor = Random.next(0, 5);
       const noteLengthValues = <NoteLength[]>[
         NoteLength.Semibreve,
         NoteLength.DottedMinim,
@@ -44,10 +45,9 @@ export class AppComponent implements OnInit, OnDestroy {
         NoteLength.Quaver,
         NoteLength.SemiQuaver
       ];
-      const randomNoteLength = noteLengthValues[Random.next(0, noteLengthValues.length - 1)];
-      console.log('Most common note length, ' + randomNoteLength.toString());
-      const motif = this.musicService.motif(randomLength, randomMaxSize,
-        randomStasisInhibitor, 0.01, randomNoteLength);
+      // this.motifMostLikelyNoteLength = noteLengthValues[Random.next(0, noteLengthValues.length - 1)];
+      const motif = this.musicService.motif(this.motifLength, this.motifMaxSize,
+        this.motifStasisInhibitor, this.motifRestChance, this.motifMostLikelyNoteLength);
 
       const alteredMotif1 = this.musicService.modifyMotif(motif, motifs);
       const alteredMotif2 = this.musicService.modifyMotif(motif, motifs);
@@ -81,61 +81,48 @@ export class AppComponent implements OnInit, OnDestroy {
       for (let i = 0; i < motifs.length; i++) {
         const randomInt1 = Random.next(0, motifs.length - 1);
         const randomInt2 = Random.next(0, motifs.length - 1);
-        const randomBarLength = Random.next(0, 2);
-        let maxBarLength = 0;
-        switch (randomBarLength) {
-          case 0:
-            {
-              maxBarLength = 2;
-              break;
-            }
-          case 1:
-            {
-              maxBarLength = 4;
-              break;
-            }
-          case 2:
-            {
-              maxBarLength = 8;
-              break;
-            }
-        }
+        // const randomBarLength = Random.next(0, 2);
+        // let maxBarLength = 0;
+        // switch (randomBarLength) {
+        //   case 0:
+        //     {
+        //       maxBarLength = 2;
+        //       break;
+        //     }
+        //   case 1:
+        //     {
+        //       maxBarLength = 4;
+        //       break;
+        //     }
+        //   case 2:
+        //     {
+        //       maxBarLength = 8;
+        //       break;
+        //     }
+        // }
         const alterChance = 1 / (Random.next(1, 10));
         const phrase = this.musicService.developMotif(key, motifs[randomInt1],
-          motifs[randomInt2].pitches, timeSignature, maxBarLength, 4, alterChance);
+          motifs[randomInt2].pitches, timeSignature, this.phraseBarLength, 4, alterChance);
         phrases.push(phrase);
       }
-
-      console.log();
-      console.log();
-      console.log('Section');
-      console.log();
 
       const phraseLengthOfSection = 4;
 
       for (let i = 0; i < phraseLengthOfSection; i++) {
-        console.log(' | ');
         // let randomPhraseIndex = randomIntGenerator.Next(0, phrases.Count);
         for (const tone of phrases[i]) {
-
-          console.log(tone.id + ' ');
           this.soundService.addNoteToTransport(tone);
         }
       }
-      console.log(' | ');
       for (const tone of phrases[0]) {
-        console.log(tone.id + ' ');
         this.soundService.addNoteToTransport(tone);
       }
 
-      console.log(' || ');
       allPhrases = [...allPhrases, ...phrases];
     }
-
-    this.soundService.startTransport();
   }
 
-  ngOnDestroy() {
-    this.soundService.stopTransport();
+  startSound() {
+    this.soundService.startTransport();
   }
 }
