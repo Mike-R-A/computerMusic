@@ -30,9 +30,9 @@ export class MusicService {
   }
 
   public motif(length: number, maxSize: number, stasisInhibitor = 5,
-    restChance = 0.01, mostLikelyNoteLength = NoteLength.Crotchet): Motif {
-    const motif = new Motif();
-    let addRest = Random.next(0, Math.round(1 / restChance));
+    restChance = 0.01, mostLikelyNoteLength = NoteLength.Crotchet, isChordal = false): Motif {
+    let motif = new Motif();
+    let addRest = restChance > 0 && restChance <= 1 && Random.next(1, Math.round(1 / restChance));
     const randomPitch = addRest === 1 ? -1 : Random.next(0, maxSize);
     let previousDirection = Random.next(-1, 1);
     let nextIndex = randomPitch;
@@ -60,6 +60,9 @@ export class MusicService {
 
       motif.pitches.push(nextIndex);
       motif.rhythm.push(this.randomNoteLength(mostLikelyNoteLength));
+    }
+    if (isChordal) {
+      motif = this.makeChordal(motif);
     }
     return motif;
   }

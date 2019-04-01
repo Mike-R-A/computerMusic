@@ -20,6 +20,9 @@ export class AppComponent implements OnInit {
   motifRestChance = 0.01;
   motifMostLikelyNoteLength = NoteLength.Crotchet;
   phraseBarLength = 8;
+  isChordalChance = 0.25;
+  motifs = [];
+  phrases = [];
   constructor(private soundService: SoundService,
     private musicService: MusicService,
     private keyService: KeyService, private changeDetector: ChangeDetectorRef) { }
@@ -28,50 +31,27 @@ export class AppComponent implements OnInit {
     this.compose();
   }
 
-  compose() {
-    const motifs = <IMotif[]>[];
-
-    for (let i = 0; i < 4; i++) {
-      // this.motifLength = Random.next(1, 10);
-      // this.motifMaxSize = Random.next(1, 12);
-      // this.motifStasisInhibitor = Random.next(0, 5);
-      const noteLengthValues = <NoteLength[]>[
-        NoteLength.Semibreve,
-        NoteLength.DottedMinim,
-        NoteLength.Minim,
-        NoteLength.DottedCrotchet,
-        NoteLength.Crotchet,
-        NoteLength.DottedQuaver,
-        NoteLength.Quaver,
-        NoteLength.SemiQuaver
-      ];
-      // this.motifMostLikelyNoteLength = noteLengthValues[Random.next(0, noteLengthValues.length - 1)];
+  createMotifs(numberOfMotifs = 4) {
+    for (let i = 0; i < numberOfMotifs; i++) {
+      const isChordal = this.isChordalChance >= 0 && this.isChordalChance <= 1
+        && Random.next(1, Math.round(1 / this.isChordalChance)) === 1;
       const motif = this.musicService.motif(this.motifLength, this.motifMaxSize,
-        this.motifStasisInhibitor, this.motifRestChance, this.motifMostLikelyNoteLength);
-
-      const alteredMotif1 = this.musicService.modifyMotif(motif, motifs);
-      const alteredMotif2 = this.musicService.modifyMotif(motif, motifs);
-      const chordalMotif1 = this.musicService.makeChordal(motif);
-      const chordalMotif2 = this.musicService.makeChordal(motif);
-      const chordalMotif3 = this.musicService.makeChordal(motif);
-      motifs.push(motif);
-      // motifs.push(alteredMotif1);
-      // motifs.push(alteredMotif2);
-      // motifs.push(chordalMotif1);
-      // motifs.push(chordalMotif2);
-      // motifs.push(chordalMotif3);
+        this.motifStasisInhibitor, this.motifRestChance, this.motifMostLikelyNoteLength, isChordal);
+      this.motifs.push(motif);
     }
+  }
 
+  compose() {
+    this.createMotifs();
     const keys = <Note[][]>[];
-    keys.push(this.keyService.major(Note.C));
-    // keys.push(this.keyService.major(Note.DsharpEflat));
-    // keys.push(this.keyService.minorHarmonic(Note.C));
-    // keys.push(this.keyService.major(Note.GsharpAflat));
-    // keys.push(this.keyService.minorHarmonic(Note.F));
-    // keys.push(this.keyService.major(Note.CsharpDflat));
-    // keys.push(this.keyService.minorHarmonic(Note.AsharpBflat));
-    // keys.push(this.keyService.major(Note.E));
-    // keys.push(this.keyService.minorHarmonic(Note.DsharpEflat));
+    keys.push(this.keyService.major(Note.DsharpEflat));
+    keys.push(this.keyService.minorHarmonic(Note.C));
+    keys.push(this.keyService.major(Note.GsharpAflat));
+    keys.push(this.keyService.minorHarmonic(Note.F));
+    keys.push(this.keyService.major(Note.CsharpDflat));
+    keys.push(this.keyService.minorHarmonic(Note.AsharpBflat));
+    keys.push(this.keyService.major(Note.E));
+    keys.push(this.keyService.minorHarmonic(Note.DsharpEflat));
     let allPhrases = <NoteTone[][]>[];
     for (const key of keys) {
       const phrases = <NoteTone[][]>[];
@@ -79,9 +59,9 @@ export class AppComponent implements OnInit {
       timeSignature.beats = 4;
       timeSignature.beatType = NoteLength.Crotchet;
 
-      for (let i = 0; i < motifs.length; i++) {
-        const randomInt1 = Random.next(0, motifs.length - 1);
-        const randomInt2 = Random.next(0, motifs.length - 1);
+      for (let i = 0; i < this.motifs.length; i++) {
+        const randomInt1 = Random.next(0, this.motifs.length - 1);
+        const randomInt2 = Random.next(0, this.motifs.length - 1);
         // const randomBarLength = Random.next(0, 2);
         // let maxBarLength = 0;
         // switch (randomBarLength) {
@@ -102,8 +82,8 @@ export class AppComponent implements OnInit {
         //     }
         // }
         const alterChance = 1 / (Random.next(1, 10));
-        const phrase = this.musicService.developMotif(key, motifs[randomInt1],
-          motifs[randomInt2].pitches, timeSignature, this.phraseBarLength, 4, alterChance);
+        const phrase = this.musicService.developMotif(key, this.motifs[randomInt1],
+          this.motifs[randomInt2].pitches, timeSignature, this.phraseBarLength, 4, alterChance);
         phrases.push(phrase);
       }
 
