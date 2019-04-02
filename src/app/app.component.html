@@ -1,52 +1,62 @@
-<!--The content below is only a placeholder and can be replaced.-->
-<button (click)="startSound()">Play</button>
-<button (click)="addMotif()">Add Motif</button>
-<button (click)="addMotifVariation()">Add Motif Variation</button>
-<button (click)="addPhrase()">Add Phrase</button>
-<button (click)="rewindToStart()">Rewind</button>
+<div class="button-row">
+  <button mat-fab (click)="startSound()">Play</button>
+  <button mat-fab (click)="rewindToStart()">Rewind</button>
+</div>
+<br />
+<div class="button-row">
+  <button mat-raised-button color="primary" (click)="addMotif()">Add Motif</button>
+  <button mat-raised-button color="primary" (click)="addMotifVariation()">Add Motif Variation</button>
+  <button mat-raised-button color="primary" (click)="addPhrase()">Add Phrase</button>
+</div>
 
-<div>
-  <label>Motif length (crotchets)
+<div class="control">
+  <label>
+    Motif length (crotchets)
   </label>
   <mat-slider [max]="16" [min]="0.25" [step]="0.25" [(ngModel)]="motifLength">
   </mat-slider>
   {{motifLength}}
 </div>
 
-<div>
-  <label>Motif max size
+<div class="control">
+  <label>
+    Motif max size
   </label>
   <mat-slider [max]="24" [min]="1" [step]="1" [(ngModel)]="motifMaxSize">
   </mat-slider>
   {{motifMaxSize}}
 </div>
 
-<div>
-  <label>Motif stasis inhibitor
+<div class="control">
+  <label>
+    Motif stasis inhibitor
   </label>
   <mat-slider [max]="20" [min]="0" [step]="1" [(ngModel)]="motifStasisInhibitor">
   </mat-slider>
   {{motifStasisInhibitor}}
 </div>
 
-<div>
-  <label>Motif rest chance
+<div class="control">
+  <label>
+    Motif rest chance
   </label>
   <mat-slider [max]="1" [min]="0" [step]="0.01" [(ngModel)]="motifRestChance">
   </mat-slider>
   {{motifRestChance}}
 </div>
 
-<div>
-  <label>Chance of chordal motif
+<div class="control">
+  <label>
+    Chance of chordal motif
   </label>
   <mat-slider [max]="1" [min]="0" [step]="0.01" [(ngModel)]="isChordalChance">
   </mat-slider>
   {{isChordalChance}}
 </div>
 
-<div>
-  <label>Phrase length (bars)
+<div class="control">
+  <label>
+    Phrase length (bars)
   </label>
   <mat-slider [max]="50" [min]="1" [step]="1" [(ngModel)]="phraseBarLength">
   </mat-slider>
@@ -65,6 +75,7 @@
         {{note.pitch}} {{getRhythmName(note.rhythm)}}
       </span>
       <button (click)="deleteMotif(motif, $event)">delete</button>
+      <mat-divider></mat-divider>
     </div>
   </mat-card-content>
 </mat-card>
@@ -79,6 +90,7 @@
         {{tone.id}} {{getRhythmName(tone.length)}}
       </span>
       <button (click)="deletePhrase(phrase, $event)">delete</button>
+      <mat-divider></mat-divider>
     </div>
   </mat-card-content>
 </mat-card>

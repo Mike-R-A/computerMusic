@@ -1,5 +1,13 @@
-.mat-slider {
-  width: 300px;
+.control {
+  width: 100%;
+
+  .mat-slider {
+    width: 40%;
+  }
+
+  label {
+    width: 40%;
+  }
 }
 
 .hoverable {
@@ -8,4 +16,8 @@
   }
 
   cursor: pointer;
+}
+
+.button-row button {
+  margin-right: 8px;
 }
