@@ -64,7 +64,7 @@ export class AppComponent implements OnInit {
       const randomInt2 = Random.next(0, this.motifs.length - 1);
       const alterChance = 1 / (Random.next(1, 10));
       phrase = this.musicService.developMotif(this.key, this.motifs[randomInt1],
-        this.motifs[randomInt2].pitches, timeSignature, this.phraseBarLength, 4, alterChance);
+        this.motifs[randomInt2].pitches, this.motifs, timeSignature, this.phraseBarLength, 4, alterChance);
     }
     this.phrases.push(phrase);
     this.addPhraseToTransport(phrase);
@@ -87,5 +87,9 @@ export class AppComponent implements OnInit {
 
   getRhythmName(value: any) {
     return EnumHelper.getEnumPropertyName(NoteLength, value);
+  }
+
+  rewindToStart() {
+    Tone.Transport.position = '00:00:00';
   }
 }

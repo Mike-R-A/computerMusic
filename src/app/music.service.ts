@@ -112,8 +112,8 @@ export class MusicService {
     return newMotif;
   }
 
-  public modifyMotif(motif: Motif, motifPool: Motif[] = null): Motif {
-    const noOfTypesOfDevelopment = motifPool ? 4 : 5;
+  public modifyMotif(motif: Motif, motifPool: Motif[]): Motif {
+    const noOfTypesOfDevelopment = 6;
     let developedMotif = new Motif();
     let developedMotifPitches = [...motif.pitches];
     let developedMotifRhythm = [...motif.rhythm];
@@ -157,6 +157,11 @@ export class MusicService {
             const poolSelection = Random.next(0, motifPool.length - 1);
             developedMotif = this.concatenate(motif, motifPool[poolSelection]);
           }
+          break;
+        }
+      case 6:
+        {
+          developedMotifRhythm = motif.rhythm.map(r => r <= NoteLength.Minim ? r * 2 : r);
           break;
         }
     }
@@ -207,7 +212,7 @@ export class MusicService {
     return appliedMotif;
   }
 
-  public developMotif(key: Note[], motif: Motif, startIndexes: number[],
+  public developMotif(key: Note[], motif: Motif, startIndexes: number[], motifPool: Motif[],
     timeSignature: TimeSignature, maxBars = 8, startOctave = 4, alterChance = 0.5): NoteTone[] {
     let phrase = <NoteTone[]>[];
     for (const startIndex of startIndexes) {
@@ -215,7 +220,7 @@ export class MusicService {
       const randomAlterChance = Random.next(1, max);
       let altered = new Motif();
       if (randomAlterChance === 1) {
-        altered = this.modifyMotif(motif);
+        altered = this.modifyMotif(motif, motifPool);
       } else {
         altered = motif;
       }
