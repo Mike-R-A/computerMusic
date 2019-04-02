@@ -12,7 +12,7 @@ export class SoundService {
   bar = 0;
   beat = 0;
   sixteenth = 0;
-  get currentTime() {
+  get composedTime() {
     return this.bar.toString() + ':' +
       this.beat.toString() + ':' +
       this.sixteenth.toString();
@@ -25,7 +25,7 @@ export class SoundService {
   }
 
   addTime(noteLength: NoteLength, beatsInBar = 4) {
-    console.log(this.bar, ':', this.beat, ':', this.sixteenth, 'currentTime', this.currentTime, ' notelength:', noteLength);
+    console.log(this.bar, ':', this.beat, ':', this.sixteenth, 'composedTime', this.composedTime, ' notelength:', noteLength);
 
     const addedToBeat = this.beat + noteLength;
     let bars = 0;
@@ -39,17 +39,17 @@ export class SoundService {
       this.bar = this.bar + bars;
     }
 
-    console.log(this.bar, ':', this.beat, ':', this.sixteenth, ' currentTime:', this.currentTime);
+    console.log(this.bar, ':', this.beat, ':', this.sixteenth, ' composedTime:', this.composedTime);
   }
 
   addNoteToTransport(tone: NoteTone) {
-    console.log('addToTransport', tone, this.currentTime);
+    console.log('addToTransport', tone, this.composedTime);
 
     Tone.Transport.schedule((time) => {
       if (tone.note !== Note.Rest) {
         this.playNote(tone, time);
       }
-    }, this.currentTime);
+    }, this.composedTime);
     this.addTime(tone.length);
   }
 

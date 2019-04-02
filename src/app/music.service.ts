@@ -180,6 +180,12 @@ export class MusicService {
         }
     }
 
+    const minValue = Math.min(...developedMotifPitches);
+    if (minValue < 0) {
+      const transposeAmount = Math.abs(minValue);
+      developedMotifPitches = this.transpose(developedMotifPitches, transposeAmount);
+    }
+
     developedMotif.pitches = developedMotifPitches;
     developedMotif.rhythm = developedMotifRhythm;
     return developedMotif;

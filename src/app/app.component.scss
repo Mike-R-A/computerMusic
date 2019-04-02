@@ -1,3 +1,11 @@
 .mat-slider {
   width: 300px;
 }
+
+.hoverable {
+  &:hover {
+    background-color: antiquewhite;
+  }
+
+  cursor: pointer;
+}

@@ -20,5 +20,34 @@
   {{phraseBarLength}}
 </div>
 
+<div>{{soundService.composedTime}}</div>
+
+<mat-card *ngIf="motifs.length > 0">
+  <mat-card-header>
+    <mat-card-title>Motifs</mat-card-title>
+  </mat-card-header>
+  <mat-card-content>
+    <div *ngFor="let motif of motifs" class="hoverable" (click)="addMotif(motif)">
+      <span *ngFor="let note of motif.notes">
+        {{note.pitch}} {{getRhythmName(note.rhythm)}}
+      </span>
+      <button (click)="deleteMotif(motif, $event)">delete</button>
+    </div>
+  </mat-card-content>
+</mat-card>
+
+<mat-card *ngIf="phrases.length > 0">
+  <mat-card-header>
+    <mat-card-title>Phrases</mat-card-title>
+  </mat-card-header>
+  <mat-card-content>
+    <div *ngFor="let phrase of phrases" class="hoverable" (click)="addPhrase(phrase)">
+      <span *ngFor="let tone of phrase">
+        {{tone.id}} {{getRhythmName(tone.length)}}
+      </span>
+      <button (click)="deletePhrase(phrase, $event)">delete</button>
+    </div>
+  </mat-card-content>
+</mat-card>
 
 <router-outlet></router-outlet>

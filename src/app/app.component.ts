@@ -6,6 +6,8 @@ import { KeyService } from './key.service';
 import { TimeSignature } from './model/time-signature';
 import { NoteLength, Note } from './model/enums';
 import { NoteTone } from './model/tone';
+import { Motif } from './model/motif';
+import { EnumHelper } from './helpers/enum-helper';
 
 @Component({
   selector: 'app-root',
@@ -21,9 +23,9 @@ export class AppComponent implements OnInit {
   motifMostLikelyNoteLength = NoteLength.Crotchet;
   phraseBarLength = 4;
   isChordalChance = 0.25;
-  motifs = [];
-  phrases = [];
-  key = [];
+  motifs = <Motif[]>[];
+  phrases = <NoteTone[][]>[];
+  key = <Note[]>[];
   constructor(private soundService: SoundService,
     private musicService: MusicService,
     private keyService: KeyService) { }
@@ -32,29 +34,48 @@ export class AppComponent implements OnInit {
     this.key = this.keyService.minorHarmonic(Note.C);
   }
 
-  addMotif() {
-    const isChordal = this.isChordalChance >= 0 && this.isChordalChance <= 1
-      && Random.next(1, Math.round(1 / this.isChordalChance)) === 1;
-    const motif = this.musicService.motif(this.motifLength, this.motifMaxSize,
-      this.motifStasisInhibitor, this.motifRestChance, this.motifMostLikelyNoteLength, isChordal);
+  addMotif(motif: Motif) {
+    if (!motif) {
+      const isChordal = this.isChordalChance >= 0 && this.isChordalChance <= 1
+        && Random.next(1, Math.round(1 / this.isChordalChance)) === 1;
+      motif = this.musicService.motif(this.motifLength, this.motifMaxSize,
+        this.motifStasisInhibitor, this.motifRestChance, this.motifMostLikelyNoteLength, isChordal);
+    }
     this.motifs.push(motif);
+  }
+
+  deleteMotif(motif: Motif, event: MouseEvent) {
+    event.stopPropagation();
+    this.motifs.splice(this.motifs.indexOf(motif), 1);
   }
 
   addMotifVariation() {
     const randomInt = Random.next(0, this.motifs.length - 1);
-    this.musicService.modifyMotif(this.motifs[randomInt], this.motifs);
+    const motif = this.musicService.modifyMotif(this.motifs[randomInt], this.motifs);
+    this.motifs.push(motif);
   }
 
-  addPhrase() {
-    const timeSignature = new TimeSignature();
-    timeSignature.beats = 4;
-    timeSignature.beatType = NoteLength.Crotchet;
-    const randomInt1 = Random.next(0, this.motifs.length - 1);
-    const randomInt2 = Random.next(0, this.motifs.length - 1);
-    const alterChance = 1 / (Random.next(1, 10));
-    const phrase = this.musicService.developMotif(this.key, this.motifs[randomInt1],
-      this.motifs[randomInt2].pitches, timeSignature, this.phraseBarLength, 4, alterChance);
+  addPhrase(phrase: NoteTone[] = null) {
+    if (!phrase) {
+      const timeSignature = new TimeSignature();
+      timeSignature.beats = 4;
+      timeSignature.beatType = NoteLength.Crotchet;
+      const randomInt1 = Random.next(0, this.motifs.length - 1);
+      const randomInt2 = Random.next(0, this.motifs.length - 1);
+      const alterChance = 1 / (Random.next(1, 10));
+      phrase = this.musicService.developMotif(this.key, this.motifs[randomInt1],
+        this.motifs[randomInt2].pitches, timeSignature, this.phraseBarLength, 4, alterChance);
+    }
     this.phrases.push(phrase);
+    this.addPhraseToTransport(phrase);
+  }
+
+  deletePhrase(phrase: NoteTone[], event: MouseEvent) {
+    event.stopPropagation();
+    this.phrases.splice(this.phrases.indexOf(phrase), 1);
+  }
+
+  addPhraseToTransport(phrase: NoteTone[]) {
     for (const tone of phrase) {
       this.soundService.addNoteToTransport(tone);
     }
@@ -62,5 +83,9 @@ export class AppComponent implements OnInit {
 
   startSound() {
     this.soundService.startTransport();
+  }
+
+  getRhythmName(value: any) {
+    return EnumHelper.getEnumPropertyName(NoteLength, value);
   }
 }
