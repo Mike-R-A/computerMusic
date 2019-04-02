@@ -21,12 +21,10 @@ export class SoundService {
   constructor() {
     this.synth = new Tone.Synth().toMaster();
     this.synth.sync();
-    Tone.Transport.bpm.value = 120;
+    this.setUp();
   }
 
   addTime(noteLength: NoteLength, beatsInBar = 4) {
-    console.log(this.bar, ':', this.beat, ':', this.sixteenth, 'composedTime', this.composedTime, ' notelength:', noteLength);
-
     const addedToBeat = this.beat + noteLength;
     let bars = 0;
     const remainder = addedToBeat % beatsInBar;
@@ -38,13 +36,9 @@ export class SoundService {
       bars = Math.floor(addedToBeat / beatsInBar);
       this.bar = this.bar + bars;
     }
-
-    console.log(this.bar, ':', this.beat, ':', this.sixteenth, ' composedTime:', this.composedTime);
   }
 
   addNoteToTransport(tone: NoteTone) {
-    console.log('addToTransport', tone, this.composedTime);
-
     Tone.Transport.schedule((time) => {
       if (tone.note !== Note.Rest) {
         this.playNote(tone, time);
@@ -62,7 +56,6 @@ export class SoundService {
   }
 
   playSound(note: string, duration: string, time: any, volume: number) {
-    console.log('playSound', note, duration);
     this.synth.triggerAttackRelease(note, duration, time, volume);
   }
 
@@ -93,5 +86,11 @@ export class SoundService {
         return '16n';
       }
     }
+  }
+
+  setUp() {
+    this.synth = new Tone.Synth().toMaster();
+    this.synth.sync();
+    Tone.Transport.bpm.value = 120;
   }
 }

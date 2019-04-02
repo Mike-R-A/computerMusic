@@ -41,14 +41,15 @@ export class MusicService {
   }
 
   public motif(length: number, maxSize: number, stasisInhibitor = 5,
-    restChance = 0.01, mostLikelyNoteLength = NoteLength.Crotchet, isChordal = false): Motif {
+    restChance = 0.01, mostLikelyNoteLength = NoteLength.Crotchet, isChordal = false, similarNoteLengthFactor = 1): Motif {
     let motif = new Motif();
     let addRest = restChance > 0 && restChance <= 1 && Random.next(1, Math.round(1 / restChance));
     const randomPitch = addRest === 1 ? -1 : Random.next(0, maxSize);
     let previousDirection = Random.next(-1, 1);
     let nextIndex = randomPitch;
     let lastIndex = randomPitch;
-    for (let i = 0; i < length; i++) {
+    let motifTotalLength = 0;
+    while (motifTotalLength < length) {
       if (nextIndex !== -1) {
         lastIndex = nextIndex;
         let direction = Random.next(-1, 1);
@@ -68,7 +69,11 @@ export class MusicService {
       }
 
       motif.pitches.push(nextIndex);
-      motif.rhythm.push(this.randomNoteLength(mostLikelyNoteLength));
+      const validLengths = this.noteLengths.filter(n => {
+        return n <= (length - motifTotalLength);
+      });
+      motif.rhythm.push(this.randomNoteLength(mostLikelyNoteLength, validLengths, similarNoteLengthFactor));
+      motifTotalLength = this.totalLength(motif.rhythm);
     }
     if (isChordal) {
       motif = this.makeChordal(motif);
@@ -76,46 +81,13 @@ export class MusicService {
     return motif;
   }
 
-  public randomNoteLength(mostLikelyNoteLength: NoteLength = null, likelyFactor = 4): NoteLength {
-    const noOfNoteLengths = 8;
-    const randomNoteLengthSelector = Random.next(0, noOfNoteLengths + likelyFactor);
-    switch (randomNoteLengthSelector) {
-      case 0:
-        {
-          return NoteLength.Semibreve;
-        }
-      case 1:
-        {
-          return NoteLength.DottedMinim;
-        }
-      case 2:
-        {
-          return NoteLength.Minim;
-        }
-      case 3:
-        {
-          return NoteLength.DottedCrotchet;
-        }
-      case 4:
-        {
-          return NoteLength.Crotchet;
-        }
-      case 5:
-        {
-          return NoteLength.DottedQuaver;
-        }
-      case 6:
-        {
-          return NoteLength.Quaver;
-        }
-      case 7:
-        {
-          return NoteLength.SemiQuaver;
-        }
-      default:
-        {
-          return mostLikelyNoteLength || NoteLength.Crotchet;
-        }
+  public randomNoteLength(mostLikelyNoteLength: NoteLength = null,
+    validNoteLengths: NoteLength[], similarNoteLengthFactor: number): NoteLength {
+    const randomNoteLengthIndex = Random.next(0, similarNoteLengthFactor * (validNoteLengths.length - 1));
+    if (randomNoteLengthIndex < validNoteLengths.length) {
+      return validNoteLengths[randomNoteLengthIndex];
+    } else {
+      return mostLikelyNoteLength || NoteLength.Crotchet;
     }
   }
 
