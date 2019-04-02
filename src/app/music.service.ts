@@ -11,7 +11,18 @@ import { NoteTone } from './model/tone';
   providedIn: 'root'
 })
 export class MusicService {
-
+  get noteLengths() {
+    return [
+      NoteLength.Semibreve,
+      NoteLength.DottedMinim,
+      NoteLength.Minim,
+      NoteLength.DottedCrotchet,
+      NoteLength.Crotchet,
+      NoteLength.DottedQuaver,
+      NoteLength.Quaver,
+      NoteLength.SemiQuaver
+    ];
+  }
   constructor(private keyService: KeyService, private soundService: SoundService) { }
 
   public chord(key: Note[], rootNumber: number, noOfNotes: number): Note[] {
@@ -37,8 +48,6 @@ export class MusicService {
     let previousDirection = Random.next(-1, 1);
     let nextIndex = randomPitch;
     let lastIndex = randomPitch;
-    motif.pitches.push(nextIndex);
-    motif.rhythm.push(this.randomNoteLength(mostLikelyNoteLength));
     for (let i = 0; i < length; i++) {
       if (nextIndex !== -1) {
         lastIndex = nextIndex;
@@ -317,5 +326,11 @@ export class MusicService {
     } else {
       return 0;
     }
+  }
+
+  totalLength(noteLengths: NoteLength[]) {
+    return <number>noteLengths.reduce((a, b) => {
+      return a + b;
+    });
   }
 }
