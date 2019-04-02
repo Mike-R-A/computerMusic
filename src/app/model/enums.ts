@@ -11,7 +11,7 @@ export enum Note {
     FsharpGflat = 'Gb',
     G = 'G',
     GsharpAflat = 'Ab',
-    Rest = ''
+    Rest = 'Rest'
 }
 
 export enum NoteLength {
