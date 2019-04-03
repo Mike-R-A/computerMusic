@@ -12,6 +12,7 @@ export class SoundService {
   bar = 0;
   beat = 0;
   sixteenth = 0;
+  isSetup = false;
   get composedTime() {
     return this.bar.toString() + ':' +
       this.beat.toString() + ':' +
@@ -19,9 +20,6 @@ export class SoundService {
   }
 
   constructor() {
-    this.synth = new Tone.Synth().toMaster();
-    this.synth.sync();
-    this.setUp();
   }
 
   addTime(noteLength: NoteLength, beatsInBar = 4) {
@@ -47,8 +45,12 @@ export class SoundService {
     this.addTime(tone.length);
   }
 
-  startTransport() {
-    Tone.Transport.start();
+  toggleTransport() {
+    if (!this.isSetup) {
+      this.setUp();
+      this.isSetup = true;
+    }
+    Tone.Transport.toggle();
   }
 
   playNote(tone: NoteTone, time: any) {

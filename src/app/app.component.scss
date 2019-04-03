@@ -2,11 +2,12 @@
   width: 100%;
 
   .mat-slider {
-    width: 40%;
+    width: 60%;
   }
 
   label {
-    width: 40%;
+    width: 25%;
+    display: inline-block;
   }
 }
 
@@ -18,6 +19,10 @@
   cursor: pointer;
 }
 
-.button-row button {
-  margin-right: 8px;
+.mat-toolbar {
+  padding-top: 5px;
+}
+
+.mat-toolbar button {
+  margin: 8px;
 }

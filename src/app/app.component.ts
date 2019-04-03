@@ -81,8 +81,8 @@ export class AppComponent implements OnInit {
     }
   }
 
-  startSound() {
-    this.soundService.startTransport();
+  toggleTransport() {
+    this.soundService.toggleTransport();
   }
 
   getRhythmName(value: any) {
