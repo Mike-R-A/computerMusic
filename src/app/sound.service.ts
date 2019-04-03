@@ -98,4 +98,8 @@ export class SoundService {
     this.synth.sync();
     Tone.Transport.bpm.value = 120;
   }
+
+  get transportTime() {
+    return Tone.Transport.position;
+  }
 }

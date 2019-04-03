@@ -27,14 +27,17 @@ export class AppComponent implements OnInit {
   phrases = <NoteTone[][]>[];
   key = <Note[]>[];
   currentTone: NoteTone;
+  time: string;
   constructor(private soundService: SoundService,
     private musicService: MusicService,
     private keyService: KeyService, private changeDetector: ChangeDetectorRef) { }
 
   ngOnInit() {
     this.key = this.keyService.minorHarmonic(Note.C);
+    setInterval(() => {
+      this.time = this.soundService.transportTime;
+    }, 100);
     this.soundService.notePlayed.subscribe((t: NoteTone) => {
-      console.log(t.note);
       this.currentTone = t;
       this.changeDetector.detectChanges();
     });

@@ -6,6 +6,9 @@
     <button mat-fab (click)="rewindToStart()">
       <mat-icon>replay</mat-icon>
     </button>
+    <div class="time">
+      {{time}}
+    </div>
   </mat-toolbar-row>
   <mat-toolbar-row>
     <button mat-raised-button color="primary" (click)="addMotif()">
@@ -95,7 +98,9 @@
       <span *ngFor="let note of motif.notes">
         {{note.pitch}} {{getRhythmName(note.rhythm)}}
       </span>
-      <button (click)="deleteMotif(motif, $event)">delete</button>
+      <button mat-mini-fab (click)="deleteMotif(motif, $event)">
+        <mat-icon>delete</mat-icon>
+      </button>
       <mat-divider></mat-divider>
     </div>
   </mat-expansion-panel>
@@ -112,7 +117,9 @@
       <span *ngFor="let tone of phrase" [ngClass]="{'highlight': tone === currentTone}">
         {{tone.id}} {{getRhythmName(tone.length)}}
       </span>
-      <button (click)="deletePhrase(phrase, $event)">delete</button>
+      <button mat-mini-fab (click)="deletePhrase(phrase, $event)">
+        <mat-icon>delete</mat-icon>
+      </button>
       <mat-divider></mat-divider>
     </div>
   </mat-expansion-panel>
