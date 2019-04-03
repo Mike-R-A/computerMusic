@@ -51,6 +51,9 @@ export class SoundService {
       this.setUp();
       this.isSetup = true;
     }
+    if (Tone.context.state !== 'running') {
+      Tone.context.resume();
+    }
     Tone.Transport.toggle();
   }
 
@@ -93,7 +96,6 @@ export class SoundService {
   }
 
   setUp() {
-    Tone.context.resume();
     this.synth = new Tone.Synth().toMaster();
     this.synth.sync();
     Tone.Transport.bpm.value = 120;
