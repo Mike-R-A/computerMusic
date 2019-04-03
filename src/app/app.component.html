@@ -109,7 +109,7 @@
       </mat-panel-description>
     </mat-expansion-panel-header>
     <div *ngFor="let phrase of phrases" class="hoverable" (click)="addPhrase(phrase)">
-      <span *ngFor="let tone of phrase">
+      <span *ngFor="let tone of phrase" [ngClass]="{'highlight': tone === currentTone}">
         {{tone.id}} {{getRhythmName(tone.length)}}
       </span>
       <button (click)="deletePhrase(phrase, $event)">delete</button>

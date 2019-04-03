@@ -13,6 +13,7 @@ export class SoundService {
   beat = 0;
   sixteenth = 0;
   isSetup = false;
+  notePlayed = new EventEmitter<NoteTone>();
   get composedTime() {
     return this.bar.toString() + ':' +
       this.beat.toString() + ':' +
@@ -55,6 +56,7 @@ export class SoundService {
 
   playNote(tone: NoteTone, time: any) {
     this.playSound(tone.id, this.mapNoteLengthToDuration(tone.length), time, tone.volume);
+    this.notePlayed.emit(tone);
   }
 
   playSound(note: string, duration: string, time: any, volume: number) {
@@ -91,6 +93,7 @@ export class SoundService {
   }
 
   setUp() {
+    Tone.context.resume();
     this.synth = new Tone.Synth().toMaster();
     this.synth.sync();
     Tone.Transport.bpm.value = 120;

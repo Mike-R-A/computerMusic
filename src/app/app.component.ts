@@ -26,12 +26,18 @@ export class AppComponent implements OnInit {
   motifs = <Motif[]>[];
   phrases = <NoteTone[][]>[];
   key = <Note[]>[];
+  currentTone: NoteTone;
   constructor(private soundService: SoundService,
     private musicService: MusicService,
-    private keyService: KeyService) { }
+    private keyService: KeyService, private changeDetector: ChangeDetectorRef) { }
 
   ngOnInit() {
     this.key = this.keyService.minorHarmonic(Note.C);
+    this.soundService.notePlayed.subscribe((t: NoteTone) => {
+      console.log(t.note);
+      this.currentTone = t;
+      this.changeDetector.detectChanges();
+    });
   }
 
   addMotif(motif: Motif) {

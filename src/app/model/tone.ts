@@ -5,6 +5,7 @@ export class NoteTone {
     length: NoteLength;
     volume: number;
     note: Note;
+    played = false;
     get id() {
         return this.note + (this.octave || '');
     }
