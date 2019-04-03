@@ -21,14 +21,14 @@ export class AppComponent implements OnInit {
   motifStasisInhibitor = 8;
   motifRestChance = 0.01;
   motifMostLikelyNoteLength = NoteLength.Crotchet;
-  phraseBarLength = 4;
+  phraseBarLength = 8;
   isChordalChance = 0.25;
   motifs = <Motif[]>[];
   phrases = <NoteTone[][]>[];
   key = <Note[]>[];
   currentTone: NoteTone;
   time: string;
-  constructor(private soundService: SoundService,
+  constructor(public soundService: SoundService,
     private musicService: MusicService,
     private keyService: KeyService, private changeDetector: ChangeDetectorRef) { }
 
@@ -43,7 +43,7 @@ export class AppComponent implements OnInit {
     });
   }
 
-  addMotif(motif: Motif) {
+  addMotif(motif: Motif = null) {
     if (!motif) {
       const isChordal = this.isChordalChance >= 0 && this.isChordalChance <= 1
         && Random.next(1, Math.round(1 / this.isChordalChance)) === 1;
