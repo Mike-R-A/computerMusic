@@ -10,4 +10,9 @@ export class Random {
 
         return probability === 0 ? false : this.next(1, Math.round(1 / probability)) === 1;
     }
+
+    static randomFromArray(array: any[]) {
+        const randomInt = this.next(0, array.length - 1);
+        return array[randomInt];
+    }
 }

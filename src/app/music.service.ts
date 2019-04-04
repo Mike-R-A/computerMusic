@@ -216,16 +216,10 @@ export class MusicService {
     timeSignature: TimeSignature, maxBars = 8, startOctave = 4, alterChance = 0.5): NoteTone[] {
     let phrase = <NoteTone[]>[];
     for (const startIndex of startIndexes) {
-      const max = Math.round(1 / alterChance);
-      const randomAlterChance = Random.next(1, max);
-      let altered = new Motif();
-      if (randomAlterChance === 1) {
-        altered = this.modifyMotif(motif, motifPool);
-      } else {
-        altered = motif;
-      }
+      const shouldAlterMotif = Random.booleanByProbability(alterChance);
+      const motifToApply = shouldAlterMotif ? this.modifyMotif(motif, motifPool) : motif;
 
-      const addition = this.applyMotif(key, altered, startIndex, startOctave);
+      const addition = this.applyMotif(key, motifToApply, startIndex, startOctave);
       const phraseTime = this.totalTime(phrase);
       const timeWithAddition = phraseTime + this.totalTime(addition);
       const maxTime = maxBars * timeSignature.barTime;

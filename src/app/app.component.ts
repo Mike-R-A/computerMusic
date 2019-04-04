@@ -21,13 +21,22 @@ export class AppComponent implements OnInit {
   motifStasisInhibitor = 8;
   motifRestChance = 0.01;
   motifMostLikelyNoteLength = NoteLength.Crotchet;
-  phraseBarLength = 8;
+  maxPhraseBarLength = 8;
   isChordalChance = 0.25;
+  beatsInBar = 4;
+  beatsInBarType = NoteLength.Crotchet;
   motifs = <Motif[]>[];
   phrases = <NoteTone[][]>[];
   key = <Note[]>[];
   currentTone: NoteTone;
   time: string;
+
+  get timeSignature() {
+    const timeSignature = new TimeSignature();
+    timeSignature.beats = this.beatsInBar;
+    timeSignature.beatType = this.beatsInBarType;
+    return timeSignature;
+  }
 
   constructor(public soundService: SoundService,
     private musicService: MusicService,
@@ -65,14 +74,9 @@ export class AppComponent implements OnInit {
 
   addPhrase(phrase: NoteTone[] = null) {
     if (!phrase) {
-      const timeSignature = new TimeSignature();
-      timeSignature.beats = 4;
-      timeSignature.beatType = NoteLength.Crotchet;
-      const randomInt1 = Random.next(0, this.motifs.length - 1);
-      const randomInt2 = Random.next(0, this.motifs.length - 1);
       const alterChance = 1 / (Random.next(1, 10));
-      phrase = this.musicService.developMotif(this.key, this.motifs[randomInt1],
-        this.motifs[randomInt2].pitches, this.motifs, timeSignature, this.phraseBarLength, 4, alterChance);
+      phrase = this.musicService.developMotif(this.key, Random.randomFromArray(this.motifs),
+        Random.randomFromArray(this.motifs).pitches, this.motifs, this.timeSignature, this.phraseBarLength, 4, alterChance);
     } else {
       phrase = this.copyPhrase(phrase);
     }
