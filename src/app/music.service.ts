@@ -238,6 +238,12 @@ export class MusicService {
         }
       }
     }
+    this.accentFirstNoteInEachBar(phrase, timeSignature);
+    this.padWithRests(phrase, timeSignature);
+    return phrase;
+  }
+
+  private accentFirstNoteInEachBar(phrase: NoteTone[], timeSignature: TimeSignature) {
     for (let i = 0; i < phrase.length; i++) {
       const timeUpToThisTone = this.totalTime(phrase.slice(i));
       const singleBarTime = timeSignature.barTime;
@@ -247,8 +253,6 @@ export class MusicService {
         phrase[i].volume = 0.2;
       }
     }
-    this.padWithRests(phrase, timeSignature);
-    return phrase;
   }
 
   private padWithRests(phrase: NoteTone[], timeSignature: TimeSignature) {
