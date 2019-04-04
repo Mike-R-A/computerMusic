@@ -22,26 +22,12 @@ export class AppComponent implements OnInit {
   motifRestChance = 0.01;
   motifMostLikelyNoteLength = NoteLength.Crotchet;
   phraseBarLength = 8;
-  private _isChordalChance = 0.25;
+  isChordalChance = 0.25;
   motifs = <Motif[]>[];
   phrases = <NoteTone[][]>[];
   key = <Note[]>[];
   currentTone: NoteTone;
   time: string;
-
-  get isChordalChance() {
-    return this._isChordalChance;
-  }
-
-  set isChordalChance(value: number) {
-    if (value <= 1 && value >= 0) {
-      this._isChordalChance = value;
-    } else if (value > 1) {
-      this._isChordalChance = 1;
-    } else {
-      this._isChordalChance = 0;
-    }
-  }
 
   constructor(public soundService: SoundService,
     private musicService: MusicService,
@@ -60,9 +46,8 @@ export class AppComponent implements OnInit {
 
   addMotif(motif: Motif = null) {
     if (!motif) {
-      const isChordal = this.isChordalChance === 0 ? false : Random.next(1, Math.round(1 / this.isChordalChance)) === 1;
-      motif = this.musicService.motif(this.motifLength, this.motifMaxSize,
-        this.motifStasisInhibitor, this.motifRestChance, this.motifMostLikelyNoteLength, isChordal);
+      motif = this.musicService.motif(this.motifLength, this.motifMaxSize, this.motifStasisInhibitor,
+        this.motifRestChance, this.motifMostLikelyNoteLength, Random.booleanByProbability(this.isChordalChance));
     }
     this.motifs.push(motif);
   }
@@ -105,11 +90,6 @@ export class AppComponent implements OnInit {
       return copy;
     });
     return phrase;
-  }
-
-  deletePhrase(phrase: NoteTone[], event: MouseEvent) {
-    event.stopPropagation();
-    this.phrases.splice(this.phrases.indexOf(phrase), 1);
   }
 
   addPhraseToTransport(phrase: NoteTone[]) {

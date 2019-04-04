@@ -117,9 +117,6 @@
       <span *ngFor="let tone of phrase" [ngClass]="{'highlight': tone === currentTone}">
         {{tone.id}} {{getRhythmName(tone.length)}}
       </span>
-      <button mat-mini-fab (click)="deletePhrase(phrase, $event)">
-        <mat-icon>delete</mat-icon>
-      </button>
       <mat-divider></mat-divider>
     </div>
   </mat-expansion-panel>
