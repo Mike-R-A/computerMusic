@@ -226,12 +226,22 @@ export class MusicService {
       }
 
       const addition = this.applyMotif(key, altered, startIndex, startOctave);
-      const timeWithAddition = this.totalTime(phrase) + this.totalTime(addition);
+      const phraseTime = this.totalTime(phrase);
+      const timeWithAddition = phraseTime + this.totalTime(addition);
       const maxTime = maxBars * timeSignature.barTime;
 
       if (timeWithAddition < maxTime) {
         phrase = [...phrase, ...addition];
-
+      } else {
+        const lastNote = addition[0];
+        const lastNoteLenth = lastNote.length;
+        for (let i = this.noteLengths.indexOf(lastNoteLenth); i >= 0; i--) {
+          lastNote.length = this.noteLengths[i];
+          if (phraseTime + lastNote.length < maxTime) {
+            phrase.push(lastNote);
+            break;
+          }
+        }
       }
     }
     for (let i = 0; i < phrase.length; i++) {
