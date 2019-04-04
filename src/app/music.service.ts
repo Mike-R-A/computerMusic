@@ -43,8 +43,8 @@ export class MusicService {
   public motif(length: number, maxSize: number, stasisInhibitor = 5,
     restChance = 0.01, mostLikelyNoteLength = NoteLength.Crotchet, isChordal = false, similarNoteLengthFactor = 1): Motif {
     let motif = new Motif();
-    let addRest = restChance > 0 && restChance <= 1 && Random.next(1, Math.round(1 / restChance));
-    const randomPitch = addRest === 1 ? -1 : Random.next(0, maxSize);
+    let addRest = Random.booleanByProbability(restChance);
+    const randomPitch = addRest ? -1 : Random.next(0, maxSize);
     let previousDirection = Random.next(-1, 1);
     let nextIndex = randomPitch;
     let lastIndex = randomPitch;
