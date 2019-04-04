@@ -44,36 +44,35 @@ export class MusicService {
     restChance = 0.01, mostLikelyNoteLength = NoteLength.Crotchet, isChordal = false, similarNoteLengthFactor = 1): Motif {
     let motif = new Motif();
     let addRest = Random.booleanByProbability(restChance);
-    const randomPitch = addRest ? -1 : Random.next(0, maxSize);
     let previousDirection = Random.next(-1, 1);
-    let nextIndex = randomPitch;
-    let lastIndex = randomPitch;
-    let motifTotalLength = 0;
-    while (motifTotalLength < length) {
-      if (nextIndex !== -1) {
-        lastIndex = nextIndex;
+    let nextPitch = addRest ? -1 : Random.next(0, maxSize);
+    let lastPitch: number;
+    let lengthSoFar = 0;
+    while (lengthSoFar < length) {
+      if (nextPitch !== -1) {
+        lastPitch = nextPitch;
         let direction = Random.next(-1, 1);
         for (let j = 0; j < stasisInhibitor; j++) {
           if (direction === 0 || direction !== previousDirection) {
             direction = Random.next(-1, 1);
           }
         }
-        let potentialNextIndex = lastIndex + direction;
+        let potentialNextIndex = lastPitch + direction;
         previousDirection = direction;
         while (potentialNextIndex < 0 || potentialNextIndex > maxSize) {
           const newDirection = Random.next(-1, 1);
-          potentialNextIndex = nextIndex + newDirection;
+          potentialNextIndex = nextPitch + newDirection;
         }
-        addRest = Random.next(0, Math.round(1 / restChance));
-        nextIndex = restChance === 1 ? -1 : potentialNextIndex;
+        addRest = Random.booleanByProbability(restChance);
+        nextPitch = addRest ? -1 : potentialNextIndex;
       }
 
-      motif.pitches.push(nextIndex);
+      motif.pitches.push(nextPitch);
       const validLengths = this.noteLengths.filter(n => {
-        return n <= (length - motifTotalLength);
+        return n <= (length - lengthSoFar);
       });
       motif.rhythm.push(this.randomNoteLength(mostLikelyNoteLength, validLengths, similarNoteLengthFactor));
-      motifTotalLength = this.totalLength(motif.rhythm);
+      lengthSoFar = this.totalLength(motif.rhythm);
     }
     if (isChordal) {
       motif = this.makeChordal(motif);
