@@ -8,6 +8,7 @@ import { NoteLength, Note } from './model/enums';
 import { NoteTone } from './model/tone';
 import { Motif } from './model/motif';
 import { EnumHelper } from './helpers/enum-helper';
+import { MotifService } from './motif.service';
 
 @Component({
   selector: 'app-root',
@@ -40,6 +41,7 @@ export class AppComponent implements OnInit {
 
   constructor(public soundService: SoundService,
     private musicService: MusicService,
+    private motifService: MotifService,
     private keyService: KeyService, private changeDetector: ChangeDetectorRef) { }
 
   ngOnInit() {
@@ -55,7 +57,7 @@ export class AppComponent implements OnInit {
 
   addMotif(motif: Motif = null) {
     if (!motif) {
-      motif = this.musicService.motif(this.motifLength, this.motifMaxSize, this.sameDirectionChance,
+      motif = this.motifService.motif(this.motifLength, this.motifMaxSize, this.sameDirectionChance,
         this.motifRestChance, this.motifMostLikelyNoteLength, Random.booleanByProbability(this.isChordalChance));
     }
     this.motifs.push(motif);
@@ -68,7 +70,7 @@ export class AppComponent implements OnInit {
 
   addMotifVariation() {
     const randomInt = Random.next(0, this.motifs.length - 1);
-    const motif = this.musicService.modifyMotif(this.motifs[randomInt], this.motifs);
+    const motif = this.motifService.modifyMotif(this.motifs[randomInt], this.motifs);
     this.motifs.push(motif);
   }
 

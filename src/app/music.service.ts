@@ -7,184 +7,16 @@ import { Note, NoteLength } from './model/enums';
 import { Motif } from './model/motif';
 import { NoteTone } from './model/tone';
 import { environment } from 'src/environments/environment';
+import { EnumHelper } from './helpers/enum-helper';
+import { MotifService } from './motif.service';
 
 @Injectable({
   providedIn: 'root'
 })
 export class MusicService {
-  get noteLengths() {
-    return [
-      NoteLength.Semibreve,
-      NoteLength.DottedMinim,
-      NoteLength.Minim,
-      NoteLength.DottedCrotchet,
-      NoteLength.Crotchet,
-      NoteLength.DottedQuaver,
-      NoteLength.Quaver,
-      NoteLength.SemiQuaver
-    ];
-  }
-  constructor(private keyService: KeyService, private soundService: SoundService) { }
-
-  public chord(key: Note[], rootNumber: number, noOfNotes: number): Note[] {
-    const chord = <Note[]>[];
-    const rootIndex = rootNumber - 1;
-    const root = key[rootIndex];
-    chord.push(root);
-    let previous = root;
-    for (let i = 0; i < noOfNotes - 1; i++) {
-      const next = this.keyService.nextNote(previous, key, 2);
-      chord.push(next);
-      previous = next;
-    }
-
-    return chord;
-  }
-
-  public motif(length: number, maxSize: number, sameDirectionChance = 0.5,
-    restChance = 0.01, mostLikelyNoteLength = NoteLength.Crotchet, isChordal = false, mostLikelyNoteLengthFactor = 1): Motif {
-    let motif = new Motif();
-    let shouldAddRest = Random.booleanByProbability(restChance);
-    let previousDirection: number;
-    let nextPitch: number;
-    let previousPitch: number;
-    let lengthSoFar = 0;
-    while (lengthSoFar < length) {
-      shouldAddRest = Random.booleanByProbability(restChance);
-      if (shouldAddRest) {
-        nextPitch = environment.rest;
-      } else if (previousPitch && previousPitch !== environment.rest) {
-        {
-          nextPitch = this.chooseNextPitchBasedOnPrevious(sameDirectionChance, previousDirection, previousPitch, maxSize);
-          previousDirection = nextPitch - previousPitch;
-        }
-      } else {
-        nextPitch = Random.next(0, maxSize);
-        previousDirection = Random.next(-1, 1);
-      }
-      motif.pitches.push(nextPitch);
-      previousPitch = nextPitch;
-      const lengthToFill = length - lengthSoFar;
-      motif.rhythm.push(this.randomNoteLength(mostLikelyNoteLength, mostLikelyNoteLengthFactor, lengthToFill));
-      lengthSoFar = this.totalLength(motif.rhythm);
-    }
-    if (isChordal) {
-      motif = this.makeChordal(motif);
-    }
-    return motif;
-  }
-
-  private chooseNextPitchBasedOnPrevious(sameDirectionChance: number, previousDirection: number, previousPitch: number, maxSize: number) {
-    const shouldMoveInSameDirection = Random.booleanByProbability(sameDirectionChance);
-    const direction = shouldMoveInSameDirection && previousDirection !== 0 ? previousDirection : Random.next(-1, 1);
-    const potentialNextPitch = previousPitch + direction;
-    if (potentialNextPitch < 0) {
-      return previousPitch + Random.next(0, 1);
-    } else if (potentialNextPitch > maxSize) {
-      return previousPitch + Random.next(-1, 0);
-    } else {
-      return potentialNextPitch;
-    }
-  }
-
-  public randomNoteLength(mostLikelyNoteLength: NoteLength = null, mostLikelyNoteLengthFactor: number,
-    lengthToFill: number): NoteLength {
-    const validNoteLengths = this.noteLengths.filter(n => {
-      return n <= lengthToFill;
-    });
-    const randomNoteLengthIndex = Random.next(0, mostLikelyNoteLengthFactor * (validNoteLengths.length - 1));
-    if (randomNoteLengthIndex < validNoteLengths.length) {
-      return validNoteLengths[randomNoteLengthIndex];
-    } else {
-      return mostLikelyNoteLength || NoteLength.Crotchet;
-    }
-  }
-
-  public makeChordal(motif: Motif): Motif {
-    const chordalMotif = new Motif();
-    chordalMotif.pitches = motif.pitches.map(i => i === -1 ? i : i * 2);
-    chordalMotif.rhythm = [...motif.rhythm];
-
-    return chordalMotif;
-  }
-
-  public transpose(motif: number[], amount: number): number[] {
-    return motif.map(i => i === -1 ? i : i + amount);
-  }
-
-  public concatenate(motif1: Motif, motif2: Motif): Motif {
-    const newMotif = new Motif();
-    newMotif.pitches = [...newMotif.pitches, ...motif1.pitches];
-    newMotif.rhythm = [...newMotif.rhythm, ...motif1.rhythm];
-    newMotif.pitches = [...newMotif.pitches, ...motif2.pitches];
-    newMotif.rhythm = [...newMotif.rhythm, ...motif2.rhythm];
-    return newMotif;
-  }
-
-  public modifyMotif(motif: Motif, motifPool: Motif[]): Motif {
-    const noOfTypesOfDevelopment = 6;
-    let developedMotif = new Motif();
-    let developedMotifPitches = [...motif.pitches];
-    let developedMotifRhythm = [...motif.rhythm];
-    const randomInt = Random.next(1, noOfTypesOfDevelopment);
-    const displacement = Random.next(-1, 1);
-    switch (randomInt) {
-      case 1:
-        {
-          developedMotifPitches.reverse();
-          break;
-        }
-      case 2:
-        {
-          developedMotifPitches = [...developedMotifPitches, ...this.transpose(developedMotifPitches, displacement)];
-          developedMotifRhythm = [...developedMotifRhythm, ...developedMotifRhythm];
-          break;
-        }
-      case 3:
-        {
-          const copyPitches = [...developedMotifPitches];
-          const copyRhythm = [...developedMotifRhythm];
-          copyPitches.reverse();
-          copyRhythm.reverse();
-          developedMotifPitches = [...developedMotifPitches, ...this.transpose(copyPitches, displacement)];
-          developedMotifRhythm = [...developedMotifRhythm, ...copyRhythm];
-          break;
-        }
-      case 4:
-        {
-          const copyPitches = [...developedMotifPitches];
-          const copyRhythm = [...developedMotifRhythm];
-          developedMotifPitches.reverse();
-          copyRhythm.reverse();
-          developedMotifPitches = [...developedMotifPitches, ...this.transpose(copyPitches, displacement)];
-          developedMotifRhythm = [...developedMotifRhythm, ...copyRhythm];
-          break;
-        }
-      case 5:
-        {
-          if (motifPool != null) {
-            const poolSelection = Random.next(0, motifPool.length - 1);
-            developedMotif = this.concatenate(motif, motifPool[poolSelection]);
-          }
-          break;
-        }
-      case 6:
-        {
-          const max = Math.max(...motif.pitches);
-          developedMotifPitches = motif.pitches.map(p => max - p);
-          break;
-        }
-    }
-
-    const minValue = Math.min(...developedMotifPitches);
-    if (minValue < 0) {
-      const transposeAmount = Math.abs(minValue);
-      developedMotifPitches = this.transpose(developedMotifPitches, transposeAmount);
-    }
-
-    developedMotif.pitches = developedMotifPitches;
-    developedMotif.rhythm = developedMotifRhythm;
-    return developedMotif;
+  noteLengths: NoteLength[];
+  constructor(private keyService: KeyService, private soundService: SoundService, private motifService: MotifService) {
+    this.noteLengths = EnumHelper.getEnumNumberArray(NoteLength);
   }
 
   public applyMotif(key: Note[], motif: Motif, startIndex: number = null, startOctave = 4): NoteTone[] {
@@ -227,7 +59,7 @@ export class MusicService {
     let phrase = <NoteTone[]>[];
     for (const startIndex of startIndexes) {
       const shouldAlterMotif = Random.booleanByProbability(alterChance);
-      const motifToApply = shouldAlterMotif ? this.modifyMotif(motif, motifPool) : motif;
+      const motifToApply = shouldAlterMotif ? this.motifService.modifyMotif(motif, motifPool) : motif;
 
       const addition = this.applyMotif(key, motifToApply, startIndex, startOctave);
       const phraseTime = this.totalTime(phrase);
@@ -311,7 +143,7 @@ export class MusicService {
     }
   }
 
-  public totalTime(phrase: NoteTone[]): number {
+  private totalTime(phrase: NoteTone[]): number {
     const toneLengths = phrase.map(t => {
       return t.length;
     });
@@ -321,11 +153,5 @@ export class MusicService {
     } else {
       return 0;
     }
-  }
-
-  totalLength(noteLengths: NoteLength[]) {
-    return <number>noteLengths.reduce((a, b) => {
-      return a + b;
-    });
   }
 }

@@ -112,4 +112,19 @@ export class KeyService {
 
     return keyRange;
   }
+
+  public chord(key: Note[], rootNumber: number, noOfNotes: number): Note[] {
+    const chord = <Note[]>[];
+    const rootIndex = rootNumber - 1;
+    const root = key[rootIndex];
+    chord.push(root);
+    let previous = root;
+    for (let i = 0; i < noOfNotes - 1; i++) {
+      const next = this.nextNote(previous, key, 2);
+      chord.push(next);
+      previous = next;
+    }
+
+    return chord;
+  }
 }

@@ -7,4 +7,14 @@ export class EnumHelper {
         }
         return null;
     }
+
+    public static getEnumNumberArray(e: any) {
+        const enumValues = [];
+        for (const property in e) {
+            if (e.hasOwnProperty(property) && typeof e[property] === 'number') {
+                enumValues.push(e[property]);
+            }
+        }
+        return enumValues;
+    }
 }
