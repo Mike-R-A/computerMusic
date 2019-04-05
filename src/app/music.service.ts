@@ -6,6 +6,7 @@ import { TimeSignature } from './model/time-signature';
 import { Note, NoteLength } from './model/enums';
 import { Motif } from './model/motif';
 import { NoteTone } from './model/tone';
+import { environment } from 'src/environments/environment';
 
 @Injectable({
   providedIn: 'root'
@@ -41,7 +42,7 @@ export class MusicService {
   }
 
   public motif(length: number, maxSize: number, sameDirectionChance = 0.5,
-    restChance = 0.01, mostLikelyNoteLength = NoteLength.Crotchet, isChordal = false, similarNoteLengthFactor = 1): Motif {
+    restChance = 0.01, mostLikelyNoteLength = NoteLength.Crotchet, isChordal = false, mostLikelyNoteLengthFactor = 1): Motif {
     let motif = new Motif();
     let shouldAddRest = Random.booleanByProbability(restChance);
     let previousDirection: number;
@@ -50,10 +51,9 @@ export class MusicService {
     let lengthSoFar = 0;
     while (lengthSoFar < length) {
       shouldAddRest = Random.booleanByProbability(restChance);
-
       if (shouldAddRest) {
-        nextPitch = -1;
-      } else if (previousPitch && previousPitch !== -1) {
+        nextPitch = environment.rest;
+      } else if (previousPitch && previousPitch !== environment.rest) {
         {
           nextPitch = this.chooseNextPitchBasedOnPrevious(sameDirectionChance, previousDirection, previousPitch, maxSize);
           previousDirection = nextPitch - previousPitch;
@@ -64,10 +64,8 @@ export class MusicService {
       }
       motif.pitches.push(nextPitch);
       previousPitch = nextPitch;
-      const validLengths = this.noteLengths.filter(n => {
-        return n <= (length - lengthSoFar);
-      });
-      motif.rhythm.push(this.randomNoteLength(mostLikelyNoteLength, validLengths, similarNoteLengthFactor));
+      const lengthToFill = length - lengthSoFar;
+      motif.rhythm.push(this.randomNoteLength(mostLikelyNoteLength, mostLikelyNoteLengthFactor, lengthToFill));
       lengthSoFar = this.totalLength(motif.rhythm);
     }
     if (isChordal) {
@@ -89,9 +87,12 @@ export class MusicService {
     }
   }
 
-  public randomNoteLength(mostLikelyNoteLength: NoteLength = null,
-    validNoteLengths: NoteLength[], similarNoteLengthFactor: number): NoteLength {
-    const randomNoteLengthIndex = Random.next(0, similarNoteLengthFactor * (validNoteLengths.length - 1));
+  public randomNoteLength(mostLikelyNoteLength: NoteLength = null, mostLikelyNoteLengthFactor: number,
+    lengthToFill: number): NoteLength {
+    const validNoteLengths = this.noteLengths.filter(n => {
+      return n <= lengthToFill;
+    });
+    const randomNoteLengthIndex = Random.next(0, mostLikelyNoteLengthFactor * (validNoteLengths.length - 1));
     if (randomNoteLengthIndex < validNoteLengths.length) {
       return validNoteLengths[randomNoteLengthIndex];
     } else {
@@ -169,7 +170,8 @@ export class MusicService {
         }
       case 6:
         {
-          developedMotifRhythm = motif.rhythm.map(r => r <= NoteLength.Minim ? r * 2 : r);
+          const max = Math.max(...motif.pitches);
+          developedMotifPitches = motif.pitches.map(p => max - p);
           break;
         }
     }
