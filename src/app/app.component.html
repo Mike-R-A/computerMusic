@@ -51,11 +51,11 @@
 
     <div class="control">
       <label>
-        Motif stasis inhibitor
+        Motif same direction chance
       </label>
-      <mat-slider [max]="20" [min]="0" [step]="1" [(ngModel)]="motifStasisInhibitor">
+      <mat-slider [max]="1" [min]="0" [step]="0.01" [(ngModel)]="sameDirectionChance">
       </mat-slider>
-      {{motifStasisInhibitor}}
+      {{sameDirectionChance}}
     </div>
 
     <div class="control">

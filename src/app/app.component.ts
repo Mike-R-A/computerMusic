@@ -18,7 +18,7 @@ export class AppComponent implements OnInit {
   title = 'computer-music';
   motifLength = 4;
   motifMaxSize = 8;
-  motifStasisInhibitor = 8;
+  sameDirectionChance = 0.5;
   motifRestChance = 0.01;
   motifMostLikelyNoteLength = NoteLength.Crotchet;
   maxPhraseBarLength = 8;
@@ -55,7 +55,7 @@ export class AppComponent implements OnInit {
 
   addMotif(motif: Motif = null) {
     if (!motif) {
-      motif = this.musicService.motif(this.motifLength, this.motifMaxSize, this.motifStasisInhibitor,
+      motif = this.musicService.motif(this.motifLength, this.motifMaxSize, this.sameDirectionChance,
         this.motifRestChance, this.motifMostLikelyNoteLength, Random.booleanByProbability(this.isChordalChance));
     }
     this.motifs.push(motif);
@@ -76,7 +76,7 @@ export class AppComponent implements OnInit {
     if (!phrase) {
       const alterChance = 1 / (Random.next(1, 10));
       phrase = this.musicService.developMotif(this.key, Random.randomFromArray(this.motifs),
-        Random.randomFromArray(this.motifs).pitches, this.motifs, this.timeSignature, this.phraseBarLength, 4, alterChance);
+        Random.randomFromArray(this.motifs).pitches, this.motifs, this.timeSignature, this.maxPhraseBarLength, 4, alterChance);
     } else {
       phrase = this.copyPhrase(phrase);
     }

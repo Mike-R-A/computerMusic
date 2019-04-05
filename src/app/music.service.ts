@@ -40,34 +40,33 @@ export class MusicService {
     return chord;
   }
 
-  public motif(length: number, maxSize: number, stasisInhibitor = 5,
+  public motif(length: number, maxSize: number, sameDirectionChance = 0.5,
     restChance = 0.01, mostLikelyNoteLength = NoteLength.Crotchet, isChordal = false, similarNoteLengthFactor = 1): Motif {
     let motif = new Motif();
     let addRest = Random.booleanByProbability(restChance);
-    let previousDirection = Random.next(-1, 1);
-    let nextPitch = addRest ? -1 : Random.next(0, maxSize);
+    const firstDirection = Random.next(-1, 1);
+    let previousDirection: number;
+    const firstPitch = addRest ? -1 : Random.next(0, maxSize);
+    let nextPitch: number;
     let lastPitch: number;
     let lengthSoFar = 0;
     while (lengthSoFar < length) {
       if (nextPitch !== -1) {
-        lastPitch = nextPitch;
-        let direction = Random.next(-1, 1);
-        for (let j = 0; j < stasisInhibitor; j++) {
-          if (direction === 0 || direction !== previousDirection) {
-            direction = Random.next(-1, 1);
-          }
-        }
-        let potentialNextIndex = lastPitch + direction;
-        previousDirection = direction;
-        while (potentialNextIndex < 0 || potentialNextIndex > maxSize) {
-          const newDirection = Random.next(-1, 1);
-          potentialNextIndex = nextPitch + newDirection;
+        const shouldMoveInSameDirection = Random.booleanByProbability(sameDirectionChance);
+        const direction = shouldMoveInSameDirection ? (previousDirection || firstDirection) : Random.next(-1, 1);
+        let potentialNextPitch = (lastPitch || firstPitch) + direction;
+        if (potentialNextPitch < 0) {
+          potentialNextPitch = (lastPitch || firstPitch) + Random.next(0, 1);
+        } else if (potentialNextPitch > maxSize) {
+          potentialNextPitch = (lastPitch || firstPitch) + Random.next(-1, 0);
         }
         addRest = Random.booleanByProbability(restChance);
-        nextPitch = addRest ? -1 : potentialNextIndex;
+        previousDirection = direction;
+        nextPitch = addRest ? -1 : potentialNextPitch;
       }
 
       motif.pitches.push(nextPitch);
+      lastPitch = nextPitch;
       const validLengths = this.noteLengths.filter(n => {
         return n <= (length - lengthSoFar);
       });
