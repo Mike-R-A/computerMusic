@@ -12,7 +12,6 @@ export class MotifService {
   noteLengths: NoteLength[];
   constructor() {
     this.noteLengths = EnumHelper.getEnumNumberArray(NoteLength);
-
   }
 
   public motif(length: number, maxSize: number, sameDirectionChance = 0.5,

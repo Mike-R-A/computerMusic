@@ -6,7 +6,6 @@ import { TimeSignature } from './model/time-signature';
 import { Note, NoteLength } from './model/enums';
 import { Motif } from './model/motif';
 import { NoteTone } from './model/tone';
-import { environment } from 'src/environments/environment';
 import { EnumHelper } from './helpers/enum-helper';
 import { MotifService } from './motif.service';
 
