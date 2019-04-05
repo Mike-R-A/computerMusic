@@ -6,6 +6,10 @@
     <button mat-fab (click)="rewindToStart()">
       <mat-icon>replay</mat-icon>
     </button>
+    <button mat-fab (click)="toggleMetronome()">
+      <mat-icon *ngIf="!metronomeIsOn">timer</mat-icon>
+      <mat-icon *ngIf="metronomeIsOn">timer_off</mat-icon>
+    </button>
     <div class="time">
       {{time}}
     </div>

@@ -6,12 +6,13 @@ import { NoteTone } from './model/tone';
   providedIn: 'root'
 })
 export class SoundService {
-  synth: any;
+  synths = <any[]>[];
   minOctave = 0;
   maxOctave = 7;
   bar = 0;
   beat = 0;
   sixteenth = 0;
+  metronome: any;
   isSetup = false;
   notePlayed = new EventEmitter<NoteTone>();
   get composedTime() {
@@ -37,12 +38,13 @@ export class SoundService {
     }
   }
 
-  addNoteToTransport(tone: NoteTone) {
+  addNoteToTransport(tone: NoteTone, synthIndex = 0) {
     Tone.Transport.schedule((time) => {
       if (tone.note !== Note.Rest) {
-        this.playNote(tone, time);
+        this.playTone(this.synths[synthIndex], tone, time);
       }
     }, this.composedTime);
+
     this.addTime(tone.length);
   }
 
@@ -57,13 +59,13 @@ export class SoundService {
     Tone.Transport.toggle();
   }
 
-  playNote(tone: NoteTone, time: any) {
-    this.playSound(tone.id, this.mapNoteLengthToDuration(tone.length), time, tone.volume);
+  playTone(instrument: any, tone: NoteTone, time: any) {
+    this.playSound(instrument, tone.id, this.mapNoteLengthToDuration(tone.length), time, tone.volume);
     this.notePlayed.emit(tone);
   }
 
-  playSound(note: string, duration: string, time: any, volume: number) {
-    this.synth.triggerAttackRelease(note, duration, time, volume);
+  playSound(instrument: any, note: string, duration: string, time: any, volume: number) {
+    instrument.triggerAttackRelease(note, duration, time, volume);
   }
 
   mapNoteLengthToDuration(noteLength: NoteLength) {
@@ -96,9 +98,36 @@ export class SoundService {
   }
 
   setUp() {
-    this.synth = new Tone.Synth().toMaster();
-    this.synth.sync();
+    this.synths.push(new Tone.Synth().toMaster());
+    this.synths.push(new Tone.AMSynth().toMaster());
+    this.synths.push(new Tone.MembraneSynth({
+      pitchDecay: 0.05,
+      octaves: 1,
+      oscillator: {
+        type: 'sine'
+      },
+      envelope: {
+        attack: 0.001,
+        decay: 0.4,
+        sustain: 0.01,
+        release: 1.4,
+        attackCurve: 'exponential'
+      }
+    }).toMaster());
     Tone.Transport.bpm.value = 120;
+  }
+
+  metronomeOn() {
+    console.log('on');
+    this.metronome = Tone.Transport.scheduleRepeat((time) => {
+      this.synths[2].triggerAttackRelease('C2', this.mapNoteLengthToDuration(NoteLength.Quaver), time, 0.5);
+    }, '4n');
+  }
+
+  metronomeOff() {
+    console.log('off');
+
+    Tone.Transport.clear(this.metronome);
   }
 
   get transportTime() {

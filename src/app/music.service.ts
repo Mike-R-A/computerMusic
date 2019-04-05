@@ -100,7 +100,7 @@ export class MusicService {
     const singleBarTime = timeSignature.barTime;
     const remainder = this.totalTime(phrase) % singleBarTime;
     let endRestTime = singleBarTime - remainder;
-    while (endRestTime > NoteLength.Semibreve) {
+    while (endRestTime >= NoteLength.Semibreve) {
       const newTone = new NoteTone();
       newTone.note = Note.Rest;
       newTone.length = NoteLength.Semibreve;
@@ -108,7 +108,7 @@ export class MusicService {
       phrase.push(newTone);
       endRestTime = endRestTime - NoteLength.Semibreve;
     }
-    while (endRestTime > NoteLength.Minim) {
+    while (endRestTime >= NoteLength.Minim) {
       const newTone = new NoteTone();
       newTone.note = Note.Rest;
       newTone.length = NoteLength.Minim;
@@ -116,7 +116,7 @@ export class MusicService {
       phrase.push(newTone);
       endRestTime = endRestTime - NoteLength.Minim;
     }
-    while (endRestTime > NoteLength.Crotchet) {
+    while (endRestTime >= NoteLength.Crotchet) {
       const newTone = new NoteTone();
       newTone.note = Note.Rest;
       newTone.length = NoteLength.Crotchet;
@@ -124,7 +124,7 @@ export class MusicService {
       phrase.push(newTone);
       endRestTime = endRestTime - NoteLength.Crotchet;
     }
-    while (endRestTime > NoteLength.Quaver) {
+    while (endRestTime >= NoteLength.Quaver) {
       const newTone = new NoteTone();
       newTone.note = Note.Rest;
       newTone.length = NoteLength.Quaver;
@@ -132,7 +132,7 @@ export class MusicService {
       phrase.push(newTone);
       endRestTime = endRestTime - NoteLength.Quaver;
     }
-    while (endRestTime > NoteLength.SemiQuaver) {
+    while (endRestTime >= NoteLength.SemiQuaver) {
       const newTone = new NoteTone();
       newTone.note = Note.Rest;
       newTone.length = NoteLength.SemiQuaver;

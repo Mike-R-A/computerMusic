@@ -31,6 +31,7 @@ export class AppComponent implements OnInit {
   key = <Note[]>[];
   currentTone: NoteTone;
   time: string;
+  metronomeIsOn = false;
 
   get timeSignature() {
     const timeSignature = new TimeSignature();
@@ -106,6 +107,15 @@ export class AppComponent implements OnInit {
 
   toggleTransport() {
     this.soundService.toggleTransport();
+  }
+
+  toggleMetronome() {
+    this.metronomeIsOn = !this.metronomeIsOn;
+    if (this.metronomeIsOn) {
+      this.soundService.metronomeOn();
+    } else {
+      this.soundService.metronomeOff();
+    }
   }
 
   getRhythmName(value: any) {
