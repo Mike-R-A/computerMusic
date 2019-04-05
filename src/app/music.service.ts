@@ -46,32 +46,24 @@ export class MusicService {
     let shouldAddRest = Random.booleanByProbability(restChance);
     let previousDirection: number;
     let nextPitch: number;
-    let lastPitch: number;
+    let previousPitch: number;
     let lengthSoFar = 0;
     while (lengthSoFar < length) {
       shouldAddRest = Random.booleanByProbability(restChance);
 
       if (shouldAddRest) {
         nextPitch = -1;
-      } else if (lastPitch && lastPitch !== -1) {
+      } else if (previousPitch && previousPitch !== -1) {
         {
-          const shouldMoveInSameDirection = Random.booleanByProbability(sameDirectionChance);
-          const direction = shouldMoveInSameDirection && previousDirection !== 0 ? previousDirection : Random.next(-1, 1);
-          let potentialNextPitch = lastPitch + direction;
-          if (potentialNextPitch < 0) {
-            potentialNextPitch = lastPitch + Random.next(0, 1);
-          } else if (potentialNextPitch > maxSize) {
-            potentialNextPitch = lastPitch + Random.next(-1, 0);
-          }
-          previousDirection = direction;
-          nextPitch = potentialNextPitch;
+          nextPitch = this.chooseNextPitchBasedOnPrevious(sameDirectionChance, previousDirection, previousPitch, maxSize);
+          previousDirection = nextPitch - previousPitch;
         }
       } else {
         nextPitch = Random.next(0, maxSize);
         previousDirection = Random.next(-1, 1);
       }
       motif.pitches.push(nextPitch);
-      lastPitch = nextPitch;
+      previousPitch = nextPitch;
       const validLengths = this.noteLengths.filter(n => {
         return n <= (length - lengthSoFar);
       });
@@ -82,6 +74,19 @@ export class MusicService {
       motif = this.makeChordal(motif);
     }
     return motif;
+  }
+
+  private chooseNextPitchBasedOnPrevious(sameDirectionChance: number, previousDirection: number, previousPitch: number, maxSize: number) {
+    const shouldMoveInSameDirection = Random.booleanByProbability(sameDirectionChance);
+    const direction = shouldMoveInSameDirection && previousDirection !== 0 ? previousDirection : Random.next(-1, 1);
+    const potentialNextPitch = previousPitch + direction;
+    if (potentialNextPitch < 0) {
+      return previousPitch + Random.next(0, 1);
+    } else if (potentialNextPitch > maxSize) {
+      return previousPitch + Random.next(-1, 0);
+    } else {
+      return potentialNextPitch;
+    }
   }
 
   public randomNoteLength(mostLikelyNoteLength: NoteLength = null,
