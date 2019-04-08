@@ -25,6 +25,7 @@ export class AppComponent implements OnInit {
   maxPhraseBarLength = 8;
   isChordalChance = 0.25;
   beatsInBar = 4;
+  developmentFactor = 1;
   beatsInBarType = NoteLength.Crotchet;
   motifs = <Motif[]>[];
   phrases = <NoteTone[][]>[];
@@ -78,8 +79,8 @@ export class AppComponent implements OnInit {
   addPhrase(phrase: NoteTone[] = null) {
     if (!phrase) {
       const alterChance = 1 / (Random.next(1, 10));
-      phrase = this.musicService.developMotif(this.key, Random.randomFromArray(this.motifs),
-        Random.randomFromArray(this.motifs).pitches, this.motifs, this.timeSignature, this.maxPhraseBarLength, 4, alterChance);
+      phrase = this.musicService.developMotif(this.key, Random.randomFromArray(this.motifs), Random.randomFromArray(this.motifs).pitches,
+        this.motifs, this.timeSignature, this.maxPhraseBarLength, 4, alterChance, this.developmentFactor);
     } else {
       phrase = this.copyPhrase(phrase);
     }

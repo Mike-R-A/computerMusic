@@ -86,59 +86,61 @@ export class MotifService {
     });
   }
 
-  public modifyMotif(motif: Motif, motifPool: Motif[]): Motif {
+  public modifyMotif(motif: Motif, motifPool: Motif[], developmentFactor = 1): Motif {
     const noOfTypesOfDevelopment = 6;
     let developedMotif = new Motif();
     let developedMotifPitches = [...motif.pitches];
     let developedMotifRhythm = [...motif.rhythm];
-    const randomInt = Random.next(1, noOfTypesOfDevelopment);
-    const displacement = Random.next(-1, 1);
-    switch (randomInt) {
-      case 1:
-        {
-          developedMotifPitches.reverse();
-          break;
-        }
-      case 2:
-        {
-          developedMotifPitches = [...developedMotifPitches, ...this.transpose(developedMotifPitches, displacement)];
-          developedMotifRhythm = [...developedMotifRhythm, ...developedMotifRhythm];
-          break;
-        }
-      case 3:
-        {
-          const copyPitches = [...developedMotifPitches];
-          const copyRhythm = [...developedMotifRhythm];
-          copyPitches.reverse();
-          copyRhythm.reverse();
-          developedMotifPitches = [...developedMotifPitches, ...this.transpose(copyPitches, displacement)];
-          developedMotifRhythm = [...developedMotifRhythm, ...copyRhythm];
-          break;
-        }
-      case 4:
-        {
-          const copyPitches = [...developedMotifPitches];
-          const copyRhythm = [...developedMotifRhythm];
-          developedMotifPitches.reverse();
-          copyRhythm.reverse();
-          developedMotifPitches = [...developedMotifPitches, ...this.transpose(copyPitches, displacement)];
-          developedMotifRhythm = [...developedMotifRhythm, ...copyRhythm];
-          break;
-        }
-      case 5:
-        {
-          if (motifPool != null) {
-            const poolSelection = Random.next(0, motifPool.length - 1);
-            developedMotif = this.concatenate(motif, motifPool[poolSelection]);
+    for (let i = 0; i < developmentFactor; i++) {
+      const randomInt = Random.next(1, noOfTypesOfDevelopment);
+      const displacement = Random.next(-1, 1);
+      switch (randomInt) {
+        case 1:
+          {
+            developedMotifPitches.reverse();
+            break;
           }
-          break;
-        }
-      case 6:
-        {
-          const max = Math.max(...motif.pitches);
-          developedMotifPitches = motif.pitches.map(p => max - p);
-          break;
-        }
+        case 2:
+          {
+            developedMotifPitches = [...developedMotifPitches, ...this.transpose(developedMotifPitches, displacement)];
+            developedMotifRhythm = [...developedMotifRhythm, ...developedMotifRhythm];
+            break;
+          }
+        case 3:
+          {
+            const copyPitches = [...developedMotifPitches];
+            const copyRhythm = [...developedMotifRhythm];
+            copyPitches.reverse();
+            copyRhythm.reverse();
+            developedMotifPitches = [...developedMotifPitches, ...this.transpose(copyPitches, displacement)];
+            developedMotifRhythm = [...developedMotifRhythm, ...copyRhythm];
+            break;
+          }
+        case 4:
+          {
+            const copyPitches = [...developedMotifPitches];
+            const copyRhythm = [...developedMotifRhythm];
+            developedMotifPitches.reverse();
+            copyRhythm.reverse();
+            developedMotifPitches = [...developedMotifPitches, ...this.transpose(copyPitches, displacement)];
+            developedMotifRhythm = [...developedMotifRhythm, ...copyRhythm];
+            break;
+          }
+        case 5:
+          {
+            if (motifPool != null) {
+              const poolSelection = Random.next(0, motifPool.length - 1);
+              developedMotif = this.concatenate(motif, motifPool[poolSelection]);
+            }
+            break;
+          }
+        case 6:
+          {
+            const max = Math.max(...motif.pitches);
+            developedMotifPitches = motif.pitches.map(p => max - p);
+            break;
+          }
+      }
     }
 
     const minValue = Math.min(...developedMotifPitches);

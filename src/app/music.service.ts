@@ -54,11 +54,11 @@ export class MusicService {
   }
 
   public developMotif(key: Note[], motif: Motif, startIndexes: number[], motifPool: Motif[],
-    timeSignature: TimeSignature, maxBars = 8, startOctave = 4, alterChance = 0.5): NoteTone[] {
+    timeSignature: TimeSignature, maxBars = 8, startOctave = 4, alterChance = 0.5, developmentFactor = 1): NoteTone[] {
     let phrase = <NoteTone[]>[];
     for (const startIndex of startIndexes) {
       const shouldAlterMotif = Random.booleanByProbability(alterChance);
-      const motifToApply = shouldAlterMotif ? this.motifService.modifyMotif(motif, motifPool) : motif;
+      const motifToApply = shouldAlterMotif ? this.motifService.modifyMotif(motif, motifPool, developmentFactor) : motif;
 
       const addition = this.applyMotif(key, motifToApply, startIndex, startOctave);
       const phraseTime = this.totalTime(phrase);
