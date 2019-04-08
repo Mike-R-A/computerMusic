@@ -2,7 +2,6 @@ import { Injectable } from '@angular/core';
 import { Random } from './helpers/random';
 import { Motif } from './model/motif';
 import { NoteLength } from './model/enums';
-import { environment } from 'src/environments/environment';
 import { EnumHelper } from './helpers/enum-helper';
 
 @Injectable({
@@ -25,8 +24,8 @@ export class MotifService {
     while (lengthSoFar < length) {
       shouldAddRest = Random.booleanByProbability(restChance);
       if (shouldAddRest) {
-        nextPitch = environment.rest;
-      } else if (previousPitch && previousPitch !== environment.rest) {
+        nextPitch = -1;
+      } else if (previousPitch && previousPitch !== -1) {
         {
           nextPitch = this.chooseNextPitchBasedOnPrevious(sameDirectionChance, previousDirection, previousPitch, maxSize);
           previousDirection = nextPitch - previousPitch;
