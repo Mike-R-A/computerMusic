@@ -112,8 +112,11 @@ export class SoundService {
   }
 
   setUp() {
-    this.synths.push(new Tone.Synth().toMaster());
-    this.synths.push(new Tone.AMSynth().toMaster());
+    const reverb1 = new Tone.JCReverb(0.2).connect(Tone.Master);
+    const panner1 = new Tone.Panner(0.2).connect(reverb1);
+    const panner2 = new Tone.Panner(-0.2).connect(reverb1);
+    this.synths.push(new Tone.Synth());
+    this.synths.push(new Tone.AMSynth());
     this.synths.push(new Tone.MembraneSynth({
       pitchDecay: 0.05,
       octaves: 1,
@@ -127,7 +130,12 @@ export class SoundService {
         release: 1.4,
         attackCurve: 'exponential'
       }
-    }).toMaster());
+    }));
+
+    this.synths[0].connect(panner1);
+    this.synths[1].connect(panner2);
+    this.synths[2].connect(Tone.Master);
+
     Tone.Transport.bpm.value = 120;
   }
 
