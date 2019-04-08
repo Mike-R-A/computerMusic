@@ -53,6 +53,7 @@ export class AppComponent implements OnInit {
     }, 100);
     this.soundService.notePlayed.subscribe((t: NoteTone) => {
       this.currentTone = t;
+
       this.changeDetector.detectChanges();
     });
   }
@@ -77,15 +78,22 @@ export class AppComponent implements OnInit {
   }
 
   addPhrase(phrase: NoteTone[] = null) {
+    let x;
     if (!phrase) {
       const alterChance = 1 / (Random.next(1, 10));
-      phrase = this.musicService.developMotif(this.key, Random.randomFromArray(this.motifs), Random.randomFromArray(this.motifs).pitches,
+      x = this.musicService.developMotif(this.key, Random.randomFromArray(this.motifs), Random.randomFromArray(this.motifs).pitches,
         this.motifs, this.timeSignature, this.maxPhraseBarLength, 4, alterChance, this.developmentFactor);
     } else {
       phrase = this.copyPhrase(phrase);
     }
-    this.phrases.push(phrase);
-    this.addPhraseToTransport(phrase);
+    this.phrases.push(x.phrase);
+    this.soundService.addPhraseToTransport(x.phrase, 0);
+    this.soundService.addPhraseToTransport(x.harmony, 1);
+    // this.addPhraseToTransport(x.harmony, 1);
+    for (let i = 0; i < x.phrase.length; i++) {
+      console.log(x.phrase[i], x.harmony[i]);
+    }
+
   }
 
   private copyPhrase(phrase: NoteTone[]) {
@@ -98,12 +106,6 @@ export class AppComponent implements OnInit {
       return copy;
     });
     return phrase;
-  }
-
-  addPhraseToTransport(phrase: NoteTone[]) {
-    for (const tone of phrase) {
-      this.soundService.addNoteToTransport(tone);
-    }
   }
 
   toggleTransport() {

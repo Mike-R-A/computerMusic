@@ -9,32 +9,40 @@ export class SoundService {
   synths = <any[]>[];
   minOctave = 0;
   maxOctave = 7;
-  bar = 0;
-  beat = 0;
-  sixteenth = 0;
+  time: { bar: number, beat: number, sixteenth: number }[] = [
+    { bar: 0, beat: 0, sixteenth: 0 },
+    { bar: 0, beat: 0, sixteenth: 0 }
+  ];
   metronome: any;
   isSetup = false;
   notePlayed = new EventEmitter<NoteTone>();
+
   get composedTime() {
-    return this.bar.toString() + ':' +
-      this.beat.toString() + ':' +
-      this.sixteenth.toString();
+    return this.time[0].bar.toString() + ':' +
+      this.time[0].beat.toString() + ':' +
+      this.time[0].sixteenth.toString();
+  }
+
+  getComposedTime(index: number = 0) {
+    return this.time[index].bar.toString() + ':' +
+      this.time[index].beat.toString() + ':' +
+      this.time[index].sixteenth.toString();
   }
 
   constructor() {
   }
 
-  addTime(noteLength: NoteLength, beatsInBar = 4) {
-    const addedToBeat = this.beat + noteLength;
+  addTime(noteLength: NoteLength, index: number, beatsInBar = 4) {
+    const addedToBeat = this.time[index].beat + noteLength;
     let bars = 0;
     const remainder = addedToBeat % beatsInBar;
     const beats = Math.floor(remainder);
     const sixteenths = (remainder - beats) / 0.25;
-    this.beat = beats;
-    this.sixteenth = this.sixteenth + sixteenths;
+    this.time[index].beat = beats;
+    this.time[index].sixteenth = this.time[index].sixteenth + sixteenths;
     if (addedToBeat >= beatsInBar) {
       bars = Math.floor(addedToBeat / beatsInBar);
-      this.bar = this.bar + bars;
+      this.time[index].bar = this.time[index].bar + bars;
     }
   }
 
@@ -43,9 +51,15 @@ export class SoundService {
       if (tone.note !== Note.Rest) {
         this.playTone(this.synths[synthIndex], tone, time);
       }
-    }, this.composedTime);
+    }, this.getComposedTime(synthIndex));
 
-    this.addTime(tone.length);
+    this.addTime(tone.length, synthIndex);
+  }
+
+  addPhraseToTransport(phrase: NoteTone[], synthIndex = 0) {
+    for (const tone of phrase) {
+      this.addNoteToTransport(tone, synthIndex);
+    }
   }
 
   toggleTransport() {
@@ -118,15 +132,12 @@ export class SoundService {
   }
 
   metronomeOn() {
-    console.log('on');
     this.metronome = Tone.Transport.scheduleRepeat((time) => {
       this.synths[2].triggerAttackRelease('C2', this.mapNoteLengthToDuration(NoteLength.Quaver), time, 0.5);
     }, '4n');
   }
 
   metronomeOff() {
-    console.log('off');
-
     Tone.Transport.clear(this.metronome);
   }
 

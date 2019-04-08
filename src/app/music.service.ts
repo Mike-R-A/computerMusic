@@ -8,24 +8,24 @@ import { Motif } from './model/motif';
 import { NoteTone } from './model/tone';
 import { EnumHelper } from './helpers/enum-helper';
 import { MotifService } from './motif.service';
+import { HarmonyService } from './harmony.service';
 
 @Injectable({
   providedIn: 'root'
 })
 export class MusicService {
   noteLengths: NoteLength[];
-  constructor(private keyService: KeyService, private soundService: SoundService, private motifService: MotifService) {
+  constructor(private keyService: KeyService, private soundService: SoundService,
+    private motifService: MotifService, private harmonyService: HarmonyService) {
     this.noteLengths = EnumHelper.getEnumNumberArray(NoteLength);
   }
 
-  public applyMotif(key: Note[], motif: Motif, startIndex: number = null, startOctave = 4): NoteTone[] {
+  public applyMotif(key: Note[], keyRange: NoteTone[], motif: Motif, startIndex: number = null, startOctave = 4): NoteTone[] {
     const start = startIndex || motif.pitches[0];
     const translatedMotif = new Motif();
     const translationAmount = start + startOctave * key.length - motif.pitches[0];
     translatedMotif.pitches = motif.pitches.map(i => i === -1 || i + translationAmount < 0 ? i : i + translationAmount);
     const appliedMotif = <NoteTone[]>[];
-    const octaves = 100;
-    const keyRange = this.keyService.keyRange(key, octaves);
     for (let i = 0; i < translatedMotif.pitches.length; i++) {
       const tone = new NoteTone();
 
@@ -54,13 +54,15 @@ export class MusicService {
   }
 
   public developMotif(key: Note[], motif: Motif, startIndexes: number[], motifPool: Motif[],
-    timeSignature: TimeSignature, maxBars = 8, startOctave = 4, alterChance = 0.5, developmentFactor = 1): NoteTone[] {
+    timeSignature: TimeSignature, maxBars = 8, startOctave = 4, alterChance = 0.5, developmentFactor = 1) {
     let phrase = <NoteTone[]>[];
+    const octaves = 100;
+    const keyRange = this.keyService.keyRange(key, octaves);
     for (const startIndex of startIndexes) {
       const shouldAlterMotif = Random.booleanByProbability(alterChance);
       const motifToApply = shouldAlterMotif ? this.motifService.modifyMotif(motif, motifPool, developmentFactor) : motif;
 
-      const addition = this.applyMotif(key, motifToApply, startIndex, startOctave);
+      const addition = this.applyMotif(key, keyRange, motifToApply, startIndex, startOctave);
       const phraseTime = this.totalTime(phrase);
       const timeWithAddition = phraseTime + this.totalTime(addition);
       const maxTime = maxBars * timeSignature.barTime;
@@ -81,7 +83,13 @@ export class MusicService {
     }
     this.accentFirstNoteInEachBar(phrase, timeSignature);
     this.padWithRests(phrase, timeSignature);
-    return phrase;
+
+    const harmony = this.harmonyService.firstSpeciesCounterpoint(phrase, keyRange);
+
+    return {
+      phrase,
+      harmony
+    };
   }
 
   private accentFirstNoteInEachBar(phrase: NoteTone[], timeSignature: TimeSignature) {
