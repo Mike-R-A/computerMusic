@@ -13,14 +13,15 @@ export class HarmonyService {
   firstSpeciesCounterpoint(phrase: NoteTone[], keyRange: NoteTone[]) {
     const harmony = <number[]>[];
 
-
     const firstNoteIndex = keyRange.findIndex(n => n.id === phrase[0].id); // unison
-    harmony.push(firstNoteIndex);
+    harmony.push(firstNoteIndex - 5);
     for (let i = 1; i < phrase.length; i++) {
       const currentMelodyNote = phrase[i];
+      const currentMelodyNoteIndex = keyRange.findIndex(k => k.note === currentMelodyNote.note);
       const previousMelodyNote = phrase[i - 1];
-      const melodyChange = keyRange.findIndex(k => k.note === currentMelodyNote.note)
-        - keyRange.findIndex(k => k.note === previousMelodyNote.note);
+      const previousMelodyNoteIndex = keyRange.findIndex(k => k.note === previousMelodyNote.note);
+      const melodyChange = currentMelodyNoteIndex
+        - previousMelodyNoteIndex;
       const previousHarmonyNoteIndex = harmony[i - 1];
       const previousHarmonyNote = keyRange[previousHarmonyNoteIndex];
       if (phrase[i].note === Note.Rest) {
@@ -29,10 +30,11 @@ export class HarmonyService {
       }
       const indexOfToneInRange = keyRange.findIndex(n => n.id === phrase[i].id);
 
-      const previousWasOctave = previousMelodyNote.note === previousHarmonyNote.note;
-      const previousWasFifth = previousMelodyNote.note === previousHarmonyNote.note;
+      const previousWasOctave = previousMelodyNote && previousHarmonyNote && previousMelodyNote.note === previousHarmonyNote.note;
+      const previousWasFifth = previousMelodyNoteIndex &&
+        currentMelodyNoteIndex && (previousMelodyNoteIndex - currentMelodyNoteIndex) % 7 === 4;
 
-      let harmonyChoices = previousWasOctave ? [
+      let harmonyChoices = previousWasOctave || previousWasFifth ? [
         indexOfToneInRange - 2,
         indexOfToneInRange - 5,
       ] : [
@@ -47,7 +49,7 @@ export class HarmonyService {
       harmonyChoices = harmonyChoices.filter(h => h < keyRange.length && h > 0);
 
       const stepwiseChoices = harmonyChoices.filter(choice => {
-        return Math.abs(previousHarmonyNoteIndex - choice) === 1;
+        return Math.abs(previousHarmonyNoteIndex - choice) <= 1;
       });
       const contraryMotionChoices = harmonyChoices.filter(choice => {
         return Math.sign(previousHarmonyNoteIndex - choice) !== Math.sign(melodyChange);
@@ -55,20 +57,15 @@ export class HarmonyService {
       const equalIsOk = harmonyChoices.includes(previousHarmonyNoteIndex);
 
       let noteChoice: number;
-      for (const stepChoice of stepwiseChoices) {
-        if (contraryMotionChoices.includes(stepChoice)) {
-          noteChoice = stepChoice;
-        }
-      }
-
-      if (!noteChoice) {
-        if (stepwiseChoices.length > 0) {
-          noteChoice = stepwiseChoices[0];
-        } else if (contraryMotionChoices.length > 0) {
-          noteChoice = contraryMotionChoices[0];
-        } else {
-          noteChoice = Math.min(...harmonyChoices.map(h => Math.abs(h - previousHarmonyNoteIndex)));
-        }
+      const stepAndContraryChoices = harmonyChoices.filter(h => contraryMotionChoices.includes(h) && stepwiseChoices.includes(h));
+      if (stepAndContraryChoices.length > 0) {
+        noteChoice = stepAndContraryChoices[0];
+      } else if (contraryMotionChoices.length > 0) {
+        noteChoice = contraryMotionChoices[0];
+      } else if (stepwiseChoices.length > 0) {
+        noteChoice = stepwiseChoices[0];
+      } else {
+        noteChoice = Math.min(...harmonyChoices.map(h => Math.abs(h - previousHarmonyNoteIndex)));
       }
       harmony.push(noteChoice);
     }
