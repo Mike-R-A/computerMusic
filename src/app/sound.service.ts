@@ -23,34 +23,19 @@ export class SoundService {
     this.isSetup = true;
   }
 
-  addTime(noteLength: NoteLength, index: number, beatsInBar = 4) {
-    const addedToBeat = this.parts[index].composedTime.beat + noteLength;
-    let bars = 0;
-    const remainder = addedToBeat % beatsInBar;
-    const beats = Math.floor(remainder);
-    const sixteenths = (remainder - beats) / 0.25;
-    this.parts[index].composedTime.beat = beats;
-    this.parts[index].composedTime.sixteenth = this.parts[index].composedTime.sixteenth + sixteenths;
-    if (addedToBeat >= beatsInBar) {
-      bars = Math.floor(addedToBeat / beatsInBar);
-      this.parts[index].composedTime.bar = this.parts[index].composedTime.bar + bars;
-    }
-  }
-
-  addNoteToTransport(tone: NoteTone, partIndex = 0) {
+  addNoteToTransport(tone: NoteTone, part: Part) {
     Tone.Transport.schedule((time) => {
       if (tone.note !== Note.Rest) {
-        this.playTone(this.parts[partIndex].instrument, tone, time);
+        this.playTone(part.instrument, tone, time);
       }
-    }, this.parts[partIndex].composedTime.time);
+    }, part.composedTime.time);
 
-    this.addTime(tone.length, partIndex);
-
+    part.composedTime.addTime(tone.length);
   }
 
-  addPhraseToTransport(phrase: NoteTone[], synthIndex = 0) {
+  addPhraseToTransport(phrase: NoteTone[], partNumber = 0) {
     for (const tone of phrase) {
-      this.addNoteToTransport(tone, synthIndex);
+      this.addNoteToTransport(tone, this.parts[partNumber]);
     }
   }
 
