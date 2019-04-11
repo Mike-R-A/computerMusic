@@ -1,59 +1,51 @@
 import { Injectable, EventEmitter } from '@angular/core';
 import { NoteLength, Note } from './model/enums';
 import { NoteTone } from './model/tone';
+import { Part } from './model/Part';
 
 @Injectable({
   providedIn: 'root'
 })
 export class SoundService {
-  synths = <any[]>[];
+  parts = <Part[]>[];
   minOctave = 0;
   maxOctave = 7;
-  time: { bar: number, beat: number, sixteenth: number }[] = [
-    { bar: 0, beat: 0, sixteenth: 0 },
-    { bar: 0, beat: 0, sixteenth: 0 }
-  ];
   metronome: any;
   isSetup = false;
   notePlayed = new EventEmitter<NoteTone>();
 
   get composedTime() {
-    return this.time[0].bar.toString() + ':' +
-      this.time[0].beat.toString() + ':' +
-      this.time[0].sixteenth.toString();
-  }
-
-  getComposedTime(index: number = 0) {
-    return this.time[index].bar.toString() + ':' +
-      this.time[index].beat.toString() + ':' +
-      this.time[index].sixteenth.toString();
+    return this.parts[0] ? this.parts[0].composedTime.time : '00:00:00';
   }
 
   constructor() {
+    this.setUp();
+    this.isSetup = true;
   }
 
   addTime(noteLength: NoteLength, index: number, beatsInBar = 4) {
-    const addedToBeat = this.time[index].beat + noteLength;
+    const addedToBeat = this.parts[index].composedTime.beat + noteLength;
     let bars = 0;
     const remainder = addedToBeat % beatsInBar;
     const beats = Math.floor(remainder);
     const sixteenths = (remainder - beats) / 0.25;
-    this.time[index].beat = beats;
-    this.time[index].sixteenth = this.time[index].sixteenth + sixteenths;
+    this.parts[index].composedTime.beat = beats;
+    this.parts[index].composedTime.sixteenth = this.parts[index].composedTime.sixteenth + sixteenths;
     if (addedToBeat >= beatsInBar) {
       bars = Math.floor(addedToBeat / beatsInBar);
-      this.time[index].bar = this.time[index].bar + bars;
+      this.parts[index].composedTime.bar = this.parts[index].composedTime.bar + bars;
     }
   }
 
-  addNoteToTransport(tone: NoteTone, synthIndex = 0) {
+  addNoteToTransport(tone: NoteTone, partIndex = 0) {
     Tone.Transport.schedule((time) => {
       if (tone.note !== Note.Rest) {
-        this.playTone(this.synths[synthIndex], tone, time);
+        this.playTone(this.parts[partIndex].instrument, tone, time);
       }
-    }, this.getComposedTime(synthIndex));
+    }, this.parts[partIndex].composedTime.time);
 
-    this.addTime(tone.length, synthIndex);
+    this.addTime(tone.length, partIndex);
+
   }
 
   addPhraseToTransport(phrase: NoteTone[], synthIndex = 0) {
@@ -63,10 +55,6 @@ export class SoundService {
   }
 
   toggleTransport() {
-    if (!this.isSetup) {
-      this.setUp();
-      this.isSetup = true;
-    }
     if (Tone.context.state !== 'running') {
       Tone.context.resume();
     }
@@ -115,9 +103,12 @@ export class SoundService {
     const reverb1 = new Tone.JCReverb(0.2).connect(Tone.Master);
     const panner1 = new Tone.Panner(0.2).connect(reverb1);
     const panner2 = new Tone.Panner(-0.2).connect(reverb1);
-    this.synths.push(new Tone.Synth());
-    this.synths.push(new Tone.AMSynth());
-    this.synths.push(new Tone.MembraneSynth({
+    const part1 = new Part();
+    part1.instrument = new Tone.Synth();
+    const part2 = new Part();
+    part2.instrument = new Tone.AMSynth();
+    const part3 = new Part();
+    part3.instrument = new Tone.MembraneSynth({
       pitchDecay: 0.05,
       octaves: 1,
       oscillator: {
@@ -130,19 +121,23 @@ export class SoundService {
         release: 1.4,
         attackCurve: 'exponential'
       }
-    }));
+    });
+    this.parts.push(part1);
+    this.parts.push(part2);
+    this.parts.push(part3);
 
-    this.synths[0].connect(panner1);
-    this.synths[1].connect(panner2);
-    this.synths[2].connect(Tone.Master);
+
+    this.parts[0].instrument.connect(panner1);
+    this.parts[1].instrument.connect(panner2);
+    this.parts[2].instrument.connect(Tone.Master);
 
     Tone.Transport.bpm.value = 120;
   }
 
   metronomeOn() {
     this.metronome = Tone.Transport.scheduleRepeat((time) => {
-      this.synths[2].triggerAttackRelease('C2', this.mapNoteLengthToDuration(NoteLength.Quaver), time, 0.5);
-    }, '4n');
+      this.parts[2].instrument.triggerAttackRelease('C2', this.mapNoteLengthToDuration(NoteLength.Quaver), time, 1);
+    }, '4n', '00:00:00');
   }
 
   metronomeOff() {

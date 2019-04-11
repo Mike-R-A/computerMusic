@@ -89,11 +89,6 @@ export class AppComponent implements OnInit {
     this.phrases.push(x.phrase);
     this.soundService.addPhraseToTransport(x.phrase, 0);
     this.soundService.addPhraseToTransport(x.harmony, 1);
-    // this.addPhraseToTransport(x.harmony, 1);
-    for (let i = 0; i < x.phrase.length; i++) {
-      console.log(x.phrase[i], x.harmony[i]);
-    }
-
   }
 
   private copyPhrase(phrase: NoteTone[]) {
