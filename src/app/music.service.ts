@@ -84,7 +84,7 @@ export class MusicService {
     this.accentFirstNoteInEachBar(phrase, timeSignature);
     this.padWithRests(phrase, timeSignature);
 
-    const harmony = this.harmonyService.firstSpeciesCounterpoint(phrase, keyRange);
+    const harmony = this.harmonyService.firstSpeciesCounterpoint(phrase, keyRange, Random.randomFromArray([0, 2, 4, 5, 7]));
 
     return {
       phrase,
