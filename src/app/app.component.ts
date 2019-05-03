@@ -79,13 +79,34 @@ export class AppComponent implements OnInit {
 
   addPhrase(phrase: NoteTone[] = null) {
     let x;
+    const chordHarmony = [];
     if (!phrase) {
       const alterChance = 1 / (Random.next(1, 10));
       x = this.musicService.developMotif(this.key, Random.randomFromArray(this.motifs), Random.randomFromArray(this.motifs).pitches,
         this.motifs, this.timeSignature, this.maxPhraseBarLength, 4, alterChance, this.developmentFactor);
+      const keyChords = [];
+      const chordSize = 3;
+      for (let i = 1; i <= this.key.length; i++) {
+        keyChords.push(this.keyService.chord(this.key, i, chordSize));
+      }
+      for (let i = 0; i < x.phrase.length; i++) {
+        const chords = keyChords.filter(kc => kc.includes(x.phrase[i].note) && kc.includes(x.harmony[i].note));
+        let unusedNotes = [];
+        for (const chord of chords) {
+          unusedNotes.push(chord.filter(n => n !== x.phrase[i].note && n !== x.harmony[i].note));
+          unusedNotes = [].concat.apply([], unusedNotes);
+        }
+        chordHarmony.push(unusedNotes);
+      }
+
     } else {
       phrase = this.copyPhrase(phrase);
     }
+
+    console.log(chordHarmony);
+    const bassLine = this.musicService.createBassLine(chordHarmony);
+    console.log(bassLine);
+
     this.phrases.push(x.phrase);
     this.soundService.addPhraseToTransport(x.phrase, 0);
     this.soundService.addPhraseToTransport(x.harmony, 1);

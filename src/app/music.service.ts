@@ -161,4 +161,12 @@ export class MusicService {
       return 0;
     }
   }
+
+  createBassLine(phraseOfOptions: any[]) {
+    const bassLine = [];
+    for (const options of phraseOfOptions) {
+      bassLine.push(options[Random.next(0, options.length - 1)]);
+    }
+    return bassLine;
+  }
 }
