@@ -9,6 +9,7 @@ import { NoteTone } from './model/tone';
 import { EnumHelper } from './helpers/enum-helper';
 import { MotifService } from './motif.service';
 import { HarmonyService } from './harmony.service';
+import { Piece } from './model/piece';
 
 @Injectable({
   providedIn: 'root'
@@ -54,7 +55,7 @@ export class MusicService {
   }
 
   public developMotif(key: Note[], motif: Motif, startIndexes: number[], motifPool: Motif[],
-    timeSignature: TimeSignature, maxBars = 8, startOctave = 4, alterChance = 0.5, developmentFactor = 1) {
+    timeSignature: TimeSignature, maxBars = 8, startOctave = 4, alterChance = 0.5, developmentFactor = 1): Piece {
     let phrase = <NoteTone[]>[];
     const octaves = 100;
     const keyRange = this.keyService.keyRange(key, octaves);
@@ -86,7 +87,7 @@ export class MusicService {
 
     const harmony = this.harmonyService.firstSpeciesCounterpoint(phrase, keyRange, Random.randomFromArray([0, 2, 4, 5, 7]));
 
-    return {
+    return <Piece>{
       phrase,
       harmony
     };
@@ -162,11 +163,26 @@ export class MusicService {
     }
   }
 
-  createBassLine(phraseOfOptions: any[]) {
-    const bassLine = [];
-    for (const options of phraseOfOptions) {
-      bassLine.push(options[Random.next(0, options.length - 1)]);
+  createBassLine(phraseOfOptions: NoteTone[][]) {
+    const bassLine = <NoteTone[]>[];
+    let previousNote: NoteTone;
+    let noteToneChoice: NoteTone;
+    for (let i = 0; i < phraseOfOptions.length; i++) {
+      const options = phraseOfOptions[i];
+      if (previousNote) {
+        const index = options.findIndex(o => o.note === previousNote.note);
+        if (index > -1) {
+          noteToneChoice = options[index];
+        }
+      }
+      if (!noteToneChoice) {
+        noteToneChoice = options[Random.next(0, options.length - 1)];
+      }
+      bassLine.push(noteToneChoice);
+      previousNote = noteToneChoice;
+      noteToneChoice = null;
     }
+
     return bassLine;
   }
 }

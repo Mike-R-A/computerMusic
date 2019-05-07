@@ -9,6 +9,7 @@ import { NoteTone } from './model/tone';
 import { Motif } from './model/motif';
 import { EnumHelper } from './helpers/enum-helper';
 import { MotifService } from './motif.service';
+import { Piece } from './model/piece';
 
 @Component({
   selector: 'app-root',
@@ -78,38 +79,53 @@ export class AppComponent implements OnInit {
   }
 
   addPhrase(phrase: NoteTone[] = null) {
-    let x;
-    const chordHarmony = [];
+    let x: Piece;
+    const chordHarmony = <NoteTone[][]>[];
     if (!phrase) {
       const alterChance = 1 / (Random.next(1, 10));
       x = this.musicService.developMotif(this.key, Random.randomFromArray(this.motifs), Random.randomFromArray(this.motifs).pitches,
         this.motifs, this.timeSignature, this.maxPhraseBarLength, 4, alterChance, this.developmentFactor);
-      const keyChords = [];
+      const keyChords = <Note[][]>[];
       const chordSize = 3;
       for (let i = 1; i <= this.key.length; i++) {
         keyChords.push(this.keyService.chord(this.key, i, chordSize));
       }
       for (let i = 0; i < x.phrase.length; i++) {
         const chords = keyChords.filter(kc => kc.includes(x.phrase[i].note) && kc.includes(x.harmony[i].note));
-        let unusedNotes = [];
+        const unusedTones = <NoteTone[][]>[];
+        let flattenedUnusedTones: NoteTone[];
         for (const chord of chords) {
-          unusedNotes.push(chord.filter(n => n !== x.phrase[i].note && n !== x.harmony[i].note));
-          unusedNotes = [].concat.apply([], unusedNotes);
+          const unusedChordNotes = chord.filter(n => n !== x.phrase[i].note && n !== x.harmony[i].note);
+          const unusedChordTones = unusedChordNotes.map(u => {
+            const noteTone = new NoteTone();
+            noteTone.length = x.phrase[i].length;
+            noteTone.volume = x.phrase[i].volume;
+            noteTone.octave = x.harmony[i].octave - 1;
+            noteTone.note = u;
+            return noteTone;
+          });
+
+          unusedTones.push(unusedChordTones);
+          flattenedUnusedTones = [].concat.apply([], unusedTones);
         }
-        chordHarmony.push(unusedNotes);
+        const restTone = new NoteTone();
+        restTone.length = x.phrase[i].length;
+        restTone.note = Note.Rest;
+        restTone.octave = null;
+        restTone.volume = null;
+        chordHarmony.push(flattenedUnusedTones || [restTone]);
       }
 
     } else {
       phrase = this.copyPhrase(phrase);
     }
 
-    console.log(chordHarmony);
     const bassLine = this.musicService.createBassLine(chordHarmony);
-    console.log(bassLine);
 
     this.phrases.push(x.phrase);
     this.soundService.addPhraseToTransport(x.phrase, 0);
     this.soundService.addPhraseToTransport(x.harmony, 1);
+    this.soundService.addPhraseToTransport(bassLine, 2);
   }
 
   private copyPhrase(phrase: NoteTone[]) {
