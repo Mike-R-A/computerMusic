@@ -31,6 +31,7 @@ export class AppComponent implements OnInit {
   motifs = <Motif[]>[];
   phrases = <NoteTone[][]>[];
   key = <Note[]>[];
+  keys = <Note[][]>[];
   currentTone: NoteTone;
   time: string;
   metronomeIsOn = false;
@@ -48,7 +49,11 @@ export class AppComponent implements OnInit {
     private keyService: KeyService, private changeDetector: ChangeDetectorRef) { }
 
   ngOnInit() {
-    this.key = this.keyService.minorHarmonic(Note.C);
+    this.keys.push(this.keyService.minorHarmonic(Note.C));
+    this.keys.push(this.keyService.major(Note.DsharpEflat));
+    this.keys.push(this.keyService.major(Note.AsharpBflat));
+    this.keys.push(this.keyService.minorHarmonic(Note.G));
+    this.keys.push(this.keyService.minorHarmonic(Note.DsharpEflat));
     setInterval(() => {
       this.time = this.soundService.transportTime;
     }, 100);
@@ -79,6 +84,7 @@ export class AppComponent implements OnInit {
   }
 
   addPhrase(phrase: NoteTone[] = null) {
+    this.key = this.keys[Random.next(0, this.keys.length - 1)];
     let x: Piece;
     const chordHarmony = <NoteTone[][]>[];
     if (!phrase) {
