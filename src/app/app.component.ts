@@ -100,7 +100,7 @@ export class AppComponent implements OnInit {
             const noteTone = new NoteTone();
             noteTone.length = x.phrase[i].length;
             noteTone.volume = x.phrase[i].volume;
-            noteTone.octave = x.harmony[i].octave - 1;
+            noteTone.octave = x.harmony[i].octave > 0 ? x.harmony[i].octave - 1 : 0;
             noteTone.note = u;
             return noteTone;
           });
