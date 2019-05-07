@@ -122,6 +122,7 @@ export class SoundService {
     this.parts[3].instrument.connect(Tone.Master);
 
     Tone.Transport.bpm.value = 120;
+    this.setBpm(120);
   }
 
   metronomeOn() {
@@ -136,5 +137,9 @@ export class SoundService {
 
   get transportTime() {
     return Tone.Transport.position;
+  }
+
+  setBpm(bpm = 120) {
+    Tone.Transport.bpm.value = bpm;
   }
 }

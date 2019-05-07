@@ -62,6 +62,7 @@ export class AppComponent implements OnInit {
 
       this.changeDetector.detectChanges();
     });
+    this.soundService.setBpm(Random.next(60, 120));
   }
 
   addMotif(motif: Motif = null) {
