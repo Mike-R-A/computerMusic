@@ -6,6 +6,6 @@ export class NoteTone {
     volume: number;
     note: Note;
     get id() {
-        return this.note + (this.octave || '');
+        return this.note === Note.Rest ? this.note : this.note + this.octave;
     }
 }

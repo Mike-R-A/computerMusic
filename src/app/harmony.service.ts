@@ -30,9 +30,9 @@ export class HarmonyService {
       const note = keyRange[h];
       const melodyNote = phrase[i];
       if (h !== -1) {
-        noteTone.note = note.note;
+        noteTone.note = note ? note.note : Note.Rest;
         noteTone.length = melodyNote.length;
-        noteTone.octave = note.octave;
+        noteTone.octave = note ? note.octave : null;
         noteTone.volume = melodyNote.volume;
       } else {
         noteTone.note = Note.Rest;

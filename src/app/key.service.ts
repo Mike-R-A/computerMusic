@@ -9,11 +9,8 @@ export class KeyService {
 
   constructor() { }
 
-  public chromatic(): Note[] {
-    return [
-      Note.A,
-      Note.AsharpBflat,
-      Note.B,
+  public chromatic(startNote = Note.C): Note[] {
+    const cChromatic = [
       Note.C,
       Note.CsharpDflat,
       Note.D,
@@ -22,8 +19,18 @@ export class KeyService {
       Note.F,
       Note.FsharpGflat,
       Note.G,
-      Note.GsharpAflat
+      Note.GsharpAflat,
+      Note.A,
+      Note.AsharpBflat,
+      Note.B
     ];
+    const startIndex = cChromatic.indexOf(startNote);
+    const chromatic = [];
+    for (let i = startIndex; i < cChromatic.length + startIndex; i++) {
+      const note = i < cChromatic.length ? cChromatic[i] : cChromatic[i - cChromatic.length];
+      chromatic.push(note);
+    }
+    return chromatic;
   }
 
   public nextNote(start: Note, key: Note[], distance: number): Note {
@@ -98,15 +105,18 @@ export class KeyService {
   public keyRange(key: Note[], noOfRepeats: number): NoteTone[] {
     const keyRange = <NoteTone[]>[];
     let octave = 0;
+    let previousNote: Note;
     for (let i = 0; i < noOfRepeats; i++) {
       for (const note of key) {
-        if (note === Note.C) {
+        const cChromatic = this.chromatic(Note.C);
+        if (cChromatic.indexOf(note) < cChromatic.indexOf(previousNote)) {
           octave++;
         }
         const newTone = new NoteTone();
         newTone.note = note;
         newTone.octave = octave;
         keyRange.push(newTone);
+        previousNote = newTone.note;
       }
     }
 

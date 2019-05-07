@@ -72,8 +72,8 @@ export class MusicService {
         phrase = [...phrase, ...addition];
       } else {
         const lastNote = addition[0];
-        const lastNoteLenth = lastNote.length;
-        for (let i = this.noteLengths.indexOf(lastNoteLenth); i >= 0; i--) {
+        const lastNoteLength = lastNote.length;
+        for (let i = this.noteLengths.indexOf(lastNoteLength); i >= 0; i--) {
           lastNote.length = this.noteLengths[i];
           if (phraseTime + lastNote.length < maxTime) {
             phrase.push(lastNote);
