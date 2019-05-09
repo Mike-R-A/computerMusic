@@ -87,10 +87,49 @@ export class MusicService {
 
     const harmony = this.harmonyService.firstSpeciesCounterpoint(phrase, keyRange, Random.randomFromArray([0, 2, 4, 5, 7]));
 
+    const chordHarmony = this.getChordHarmony(key, phrase, harmony);
+
+    const bassLine = this.createBassLine(chordHarmony, keyRange);
+
     return <Piece>{
       phrase,
-      harmony
+      harmony,
+      bassLine
     };
+  }
+
+  private getChordHarmony(key: Note[], phrase: NoteTone[], harmony: NoteTone[]) {
+    const chordHarmony = <NoteTone[][]>[];
+    const keyChords = <Note[][]>[];
+    const chordSize = 3;
+    for (let i = 1; i <= key.length; i++) {
+      keyChords.push(this.keyService.chord(key, i, chordSize));
+    }
+    for (let i = 0; i < phrase.length; i++) {
+      const chords = keyChords.filter(kc => kc.includes(phrase[i].note) && kc.includes(harmony[i].note));
+      const unusedTones = <NoteTone[][]>[];
+      let flattenedUnusedTones: NoteTone[];
+      for (const chord of chords) {
+        const unusedChordNotes = chord.filter(n => n !== phrase[i].note && n !== harmony[i].note);
+        const unusedChordTones = unusedChordNotes.map(u => {
+          const noteTone = new NoteTone();
+          noteTone.length = phrase[i].length;
+          noteTone.volume = phrase[i].volume;
+          noteTone.octave = harmony[i].octave > 0 ? harmony[i].octave - 1 : 0;
+          noteTone.note = u;
+          return noteTone;
+        });
+        unusedTones.push(unusedChordTones);
+        flattenedUnusedTones = [].concat.apply([], unusedTones);
+      }
+      const restTone = new NoteTone();
+      restTone.length = phrase[i].length;
+      restTone.note = Note.Rest;
+      restTone.octave = null;
+      restTone.volume = null;
+      chordHarmony.push(flattenedUnusedTones || [restTone]);
+    }
+    return chordHarmony;
   }
 
   private accentFirstNoteInEachBar(phrase: NoteTone[], timeSignature: TimeSignature) {
@@ -163,7 +202,7 @@ export class MusicService {
     }
   }
 
-  createBassLine(phraseOfOptions: NoteTone[][]) {
+  createBassLine(phraseOfOptions: NoteTone[][], keyRange: NoteTone[]) {
     const bassLine = <NoteTone[]>[];
     let previousNote: NoteTone;
     let noteToneChoice: NoteTone;
@@ -172,7 +211,19 @@ export class MusicService {
       if (previousNote) {
         const index = options.findIndex(o => o.note === previousNote.note);
         if (index > -1) {
-          noteToneChoice = options[index];
+          const concatLength = previousNote.length + options[index].length;
+          if (this.noteLengths.includes(concatLength)) {
+            previousNote.length = concatLength;
+            noteToneChoice = new NoteTone();
+            noteToneChoice.length = 0;
+            noteToneChoice.note = Note.Rest;
+          } else {
+            noteToneChoice = options[index];
+          }
+        } else {
+          const previousIndex = keyRange.findIndex(k => k.id === previousNote.id);
+          const stepOptions = options.filter(o => Math.abs(keyRange.findIndex(k => k.id === o.id) - previousIndex) === 1);
+          noteToneChoice = stepOptions[Random.next(0, stepOptions.length - 1)];
         }
       }
       if (!noteToneChoice) {

@@ -86,53 +86,21 @@ export class AppComponent implements OnInit {
 
   addPhrase(phrase: NoteTone[] = null) {
     this.key = this.keys[Random.next(0, this.keys.length - 1)];
-    let x: Piece;
-    const chordHarmony = <NoteTone[][]>[];
+    let harmonisedPhrase: Piece;
+
     if (!phrase) {
       const alterChance = 1 / (Random.next(1, 10));
-      x = this.musicService.developMotif(this.key, Random.randomFromArray(this.motifs), Random.randomFromArray(this.motifs).pitches,
+      harmonisedPhrase = this.musicService.developMotif(
+        this.key, Random.randomFromArray(this.motifs), Random.randomFromArray(this.motifs).pitches,
         this.motifs, this.timeSignature, this.maxPhraseBarLength, 4, alterChance, this.developmentFactor);
-      const keyChords = <Note[][]>[];
-      const chordSize = 3;
-      for (let i = 1; i <= this.key.length; i++) {
-        keyChords.push(this.keyService.chord(this.key, i, chordSize));
-      }
-      for (let i = 0; i < x.phrase.length; i++) {
-        const chords = keyChords.filter(kc => kc.includes(x.phrase[i].note) && kc.includes(x.harmony[i].note));
-        const unusedTones = <NoteTone[][]>[];
-        let flattenedUnusedTones: NoteTone[];
-        for (const chord of chords) {
-          const unusedChordNotes = chord.filter(n => n !== x.phrase[i].note && n !== x.harmony[i].note);
-          const unusedChordTones = unusedChordNotes.map(u => {
-            const noteTone = new NoteTone();
-            noteTone.length = x.phrase[i].length;
-            noteTone.volume = x.phrase[i].volume;
-            noteTone.octave = x.harmony[i].octave > 0 ? x.harmony[i].octave - 1 : 0;
-            noteTone.note = u;
-            return noteTone;
-          });
-
-          unusedTones.push(unusedChordTones);
-          flattenedUnusedTones = [].concat.apply([], unusedTones);
-        }
-        const restTone = new NoteTone();
-        restTone.length = x.phrase[i].length;
-        restTone.note = Note.Rest;
-        restTone.octave = null;
-        restTone.volume = null;
-        chordHarmony.push(flattenedUnusedTones || [restTone]);
-      }
-
     } else {
       phrase = this.copyPhrase(phrase);
     }
 
-    const bassLine = this.musicService.createBassLine(chordHarmony);
-
-    this.phrases.push(x.phrase);
-    this.soundService.addPhraseToTransport(x.phrase, 0);
-    this.soundService.addPhraseToTransport(x.harmony, 1);
-    this.soundService.addPhraseToTransport(bassLine, 2);
+    this.phrases.push(harmonisedPhrase.phrase);
+    this.soundService.addPhraseToTransport(harmonisedPhrase.phrase, 0);
+    this.soundService.addPhraseToTransport(harmonisedPhrase.harmony, 1);
+    this.soundService.addPhraseToTransport(harmonisedPhrase.bassLine, 2);
   }
 
   private copyPhrase(phrase: NoteTone[]) {
