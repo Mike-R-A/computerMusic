@@ -98,9 +98,19 @@ export class AppComponent implements OnInit {
     }
 
     this.phrases.push(harmonisedPhrase.phrase);
-    this.soundService.addPhraseToTransport(harmonisedPhrase.phrase, 0);
-    this.soundService.addPhraseToTransport(harmonisedPhrase.harmony, 1);
-    this.soundService.addPhraseToTransport(harmonisedPhrase.bassLine, 2);
+    this.soundService.addPhraseToTransport(harmonisedPhrase.phrase, 1);
+    this.soundService.addPhraseToTransport(harmonisedPhrase.harmony, 2);
+    this.soundService.addPhraseToTransport(harmonisedPhrase.bassLine, 3);
+
+    // const doubledMelody = harmonisedPhrase.phrase.map(n => {
+    //   const doubledTone = new NoteTone();
+    //   doubledTone.length = n.length,
+    //     doubledTone.note = n.note,
+    //     doubledTone.octave = n.octave + 1 < this.soundService.maxOctave ? n.octave + 1 : n.octave;
+    //   doubledTone.volume = n.volume;
+    //   return doubledTone;
+    // });
+    // this.soundService.addPhraseToTransport(doubledMelody, 3);
   }
 
   private copyPhrase(phrase: NoteTone[]) {

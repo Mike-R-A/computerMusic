@@ -89,14 +89,10 @@ export class SoundService {
     const panner1 = new Tone.Panner(0.2).connect(reverb1);
     const panner2 = new Tone.Panner(-0.2).connect(reverb1);
     const panner3 = new Tone.Panner(0.1).connect(reverb1);
-    const part1 = new Part();
-    part1.instrument = new Tone.Synth();
-    const part2 = new Part();
-    part2.instrument = new Tone.AMSynth();
-    const part3 = new Part();
-    part3.instrument = new Tone.Synth();
-    const part4 = new Part();
-    part4.instrument = new Tone.MembraneSynth({
+    const panner4 = new Tone.Panner(0.3).connect(reverb1);
+
+    const part0 = new Part();
+    part0.instrument = new Tone.MembraneSynth({
       pitchDecay: 0.05,
       octaves: 1,
       oscillator: {
@@ -110,16 +106,27 @@ export class SoundService {
         attackCurve: 'exponential'
       }
     });
+    const part1 = new Part();
+    part1.instrument = new Tone.Synth();
+    const part2 = new Part();
+    part2.instrument = new Tone.AMSynth();
+    const part3 = new Part();
+    part3.instrument = new Tone.Synth();
+    const part4 = new Part();
+    part4.instrument = new Tone.AMSynth();
+
+    this.parts.push(part0);
     this.parts.push(part1);
     this.parts.push(part2);
     this.parts.push(part3);
     this.parts.push(part4);
 
 
-    this.parts[0].instrument.connect(panner1);
-    this.parts[1].instrument.connect(panner2);
-    this.parts[2].instrument.connect(panner3);
-    this.parts[3].instrument.connect(Tone.Master);
+    this.parts[0].instrument.connect(Tone.Master);
+    this.parts[1].instrument.connect(panner1);
+    this.parts[2].instrument.connect(panner2);
+    this.parts[3].instrument.connect(panner3);
+    this.parts[4].instrument.connect(panner4);
 
     Tone.Transport.bpm.value = 120;
     this.setBpm(120);
@@ -127,7 +134,7 @@ export class SoundService {
 
   metronomeOn() {
     this.metronome = Tone.Transport.scheduleRepeat((time) => {
-      this.parts[3].instrument.triggerAttackRelease('C2', this.mapNoteLengthToDuration(NoteLength.Quaver), time, 1);
+      this.parts[0].instrument.triggerAttackRelease('C2', this.mapNoteLengthToDuration(NoteLength.Quaver), time, 1);
     }, '4n', '00:00:00');
   }
 
