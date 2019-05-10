@@ -51,9 +51,6 @@ export class AppComponent implements OnInit {
   ngOnInit() {
     this.keys.push(this.keyService.minorHarmonic(Note.C));
     this.keys.push(this.keyService.major(Note.DsharpEflat));
-    this.keys.push(this.keyService.major(Note.AsharpBflat));
-    this.keys.push(this.keyService.minorHarmonic(Note.G));
-    this.keys.push(this.keyService.minorHarmonic(Note.DsharpEflat));
     setInterval(() => {
       this.time = this.soundService.transportTime;
     }, 100);
@@ -126,6 +123,18 @@ export class AppComponent implements OnInit {
   }
 
   toggleTransport() {
+    if ((!this.phrases || this.phrases.length === 0) && (!this.motifs || this.motifs.length === 0)) {
+      this.addMotif();
+      this.addMotifVariation();
+      this.addPhrase();
+      for (let i = 0; i < 10; i++) {
+        this.addMotif();
+        this.addMotifVariation();
+        setTimeout(() => {
+          this.addPhrase();
+        }, 100);
+      }
+    }
     this.soundService.toggleTransport();
   }
 

@@ -164,6 +164,9 @@ export class HarmonyService {
   createBassLine(phraseOfOptions: NoteTone[][], keyRange: NoteTone[]) {
     const bassLine = <NoteTone[]>[];
     let previousNote: NoteTone;
+    let previousIndex: number;
+    let currentIndex: number;
+    let previousDirection: number;
     let noteToneChoice: NoteTone;
     let concatenated = false;
     for (let i = 0; i < phraseOfOptions.length; i++) {
@@ -179,9 +182,17 @@ export class HarmonyService {
             noteToneChoice = options[index];
           }
         } else {
-          const previousIndex = keyRange.findIndex(k => k.id === previousNote.id);
+          previousIndex = keyRange.findIndex(k => k.id === previousNote.id);
           const stepOptions = options.filter(o => Math.abs(keyRange.findIndex(k => k.id === o.id) - previousIndex) === 1);
-          noteToneChoice = stepOptions[Random.next(0, stepOptions.length - 1)];
+          let sameDirectionStepOptions = [];
+          if (previousDirection) {
+            sameDirectionStepOptions = stepOptions.
+              filter(s => keyRange.findIndex(k => k.id === s.id) - previousIndex === previousDirection);
+          }
+
+          noteToneChoice = sameDirectionStepOptions.length > 0 ?
+            sameDirectionStepOptions[Random.next(0, sameDirectionStepOptions.length - 1)]
+            : stepOptions[Random.next(0, stepOptions.length - 1)];
         }
       }
       if (!noteToneChoice && !concatenated) {
@@ -191,7 +202,10 @@ export class HarmonyService {
       if (noteToneChoice) {
         bassLine.push(noteToneChoice);
         previousNote = noteToneChoice;
+        currentIndex = keyRange.findIndex(k => k.id === noteToneChoice.id);
+        previousDirection = currentIndex - previousIndex;
       }
+
       noteToneChoice = null;
     }
 
